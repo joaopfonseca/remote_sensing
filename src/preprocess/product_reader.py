@@ -1,11 +1,9 @@
 
 """
 TODO:
+    - add custom indices
     - Assertions
-    - Verbose option
     - Method for x and y min and max
-    - to_pandas
-    - dump
     - documentation
 """
 
@@ -20,7 +18,7 @@ import pandas as pd
 import geopandas as gpd
 
 
-class product_reader:
+class SentinelProductReader:
     """
     Reads Sentinel 2 product and converts it into a matrix with band values.
     """
@@ -65,44 +63,50 @@ class product_reader:
         elif labels_shapefile and not label_col:
             raise TypeError('missing required argument \'label_col\'')
 
-    def plot(self, band='rgb', show_labels=False, alpha=1, cmap='Pastel1', figsize=(20, 20), dpi=80, *args):
+    def plot(self, bands=['B04', 'B03', 'B02'], show_legend=True, show_y=True, alpha=1, cmap='Pastel1', figsize=(20, 20), dpi=80, *args):
         # assertion:
         # check if X_array exists
         plt.figure(
             figsize=figsize,
             dpi=dpi
         )
-        if band=='rgb':
-            [self.bands.index(x) for x in ['B02', 'B03', 'B04']]
+        if type(bands)==list:
+            map_arr = self.X_array[:,:,[self.bands.index(x) for x in bands]]
+            pre_map_final = np.clip(map_arr, 0, 3000)/3000
         else:
-            plt.imshow(
-                self.X_array[self.bands.index(band)],
-                *args
-            )
-        # if statement: plot second layer only if y_array exists
-        im = plt.imshow(
-            np.ma.masked_where(self.y_array == self.y_fill, self.y_array),
-            alpha=alpha,
-            cmap=cmap
+            map_final = self.X_array[:,:,self.bands.index(bands)]
+
+        plt.imshow(
+            map_final,
+            *args
         )
+
+        if hasattr(self, 'y_array') and show_y:
+            im = plt.imshow(
+                np.ma.masked_where(self.y_array == self.y_fill, self.y_array),
+                alpha=alpha,
+                cmap=cmap
+            )
+
         plt.axis('off')
 
-        values = list(self.y_labels.values())
-        labels = list(self.y_labels.keys())
+        if show_legend and hasattr(self, 'y_array') and show_y:
+            values = list(self.y_labels.values())
+            labels = list(self.y_labels.keys())
 
-        colors = [ im.cmap(im.norm(value)) for value in values]
-        patches = [mpatches.Patch(color=colors[i], label=f'{labels[i]}' ) for i in values]
-        plt.legend(
-            handles=patches,
-            bbox_to_anchor=(1.01, 1),
-            loc=2,
-            borderaxespad=0.,
-            fontsize='x-large'
-        )
+            colors = [ im.cmap(im.norm(value)) for value in values]
+            patches = [mpatches.Patch(color=colors[i], label=f'{labels[i]}' ) for i in values]
+            plt.legend(
+                handles=patches,
+                bbox_to_anchor=(1.01, 1),
+                loc=2,
+                borderaxespad=0.,
+                fontsize='large'
+            )
 
     def add_labels(self, labels_shapefile, label_col):
         # assertion:
-        # check in self.meta is non empty
+        # check in self.meta is not empty
         self.label_col = label_col
         gdf = gpd.read_file(labels_shapefile)\
             .to_crs(dict(self.meta[0]['crs']))\
@@ -128,14 +132,8 @@ class product_reader:
         return self
 
     def get_X_array(self, high_resolution=True):
-        # assertion:
-        # high_resolution must be of type bool
         hw = np.array([arr.shape for arr in self.X])
-        if high_resolution:
-            idx = hw.argmax(axis=0)[0]
-        else:
-            raise ValueError('TODO: Get lower resolution y and X arrays.')
-
+        idx = hw.argmax(axis=0)[0]
         self.height, self.width = hw[idx]
         X_final = []
         for arr in self.X:
@@ -146,16 +144,11 @@ class product_reader:
         self.X_array = np.moveaxis(np.array(X_final), 0, -1)
         return self.X_array
 
-    def get_y_array(self, high_resolution=True, fill=-1):
-        # assertion:
-        # high_resolution must be of type bool
+    def get_y_array(self, fill=-1):
         self.y_fill = fill
         shapes = ((geom, value) for geom, value in zip(self.y['geometry'], self.y[self.label_col]))
         hw = np.array([arr.shape for arr in self.X])
-        if high_resolution:
-            idx = hw.argmax(axis=0)[0]
-        else:
-            idx = hw.argmin(axis=0)[0]
+        idx = hw.argmax(axis=0)[0]
 
         _meta = self.meta[idx]
         out_shape = tuple(hw[idx])
@@ -188,10 +181,38 @@ class product_reader:
         data = np.concatenate([X_reshaped, y_reshaped])
         return pd.DataFrame(data=data.T, columns=columns)
 
-    def calculate_indices(self, indices): # TODO
-        # assertion:
-        # indices must be of type list
-        pass
+    def add_indices(self, indices=['NDVI', 'NDBI', 'NDMI', 'NDWI']):
+        assert type(indices)==list, '\'indices\' must be of type list'
+
+        formula = lambda base, var: (base-var)/(base+var)
+        indices_bands = {
+            'NDVI': {'base': 'B08', 'var': 'B04'},
+            'NDBI': {'base': 'B11', 'var': 'B08'},
+            'NDMI': {'base': 'B08', 'var': 'B11'},
+            'NDWI': {'base': 'B08', 'var': 'B12'},
+        }
+        for index in indices:
+            if index not in self.X_labels:
+                base_band, var_band = indices_bands[index].values()
+                base = self.X[self.bands.index(base_band)]
+                var = self.X[self.bands.index(var_band)]
+
+                hw = np.array([arr.shape for arr in [base, var]])
+                idx = hw.argmax(axis=0)[0]
+                height, width = hw[idx]
+                base_var = []
+                for arr in [base, var]:
+                    w, h = arr.shape
+                    bv_resoluted = np.repeat(arr, repeats=height/h, axis=0)
+                    bv_resoluted = np.repeat(bv_resoluted, repeats=width/w, axis=1)
+                    base_var.append(bv_resoluted)
+
+                feature = formula(base_var[0], base_var[1])
+
+                self.X.append(feature)
+                self.X_labels.append(index)
+                self.meta.append(None)
+        return self
 
     def dump(self, fname):
         pickle.dump(self, open(fname, 'wb'))

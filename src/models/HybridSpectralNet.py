@@ -106,7 +106,7 @@ class HybridSpectralNet:
         self.model.compile(loss='categorical_crossentropy', optimizer=self.adam, metrics=['accuracy'])
         self.model.summary()
 
-    def load_weights(self, filepath=self.filepath):
+    def load_weights(self, filepath):
         self.model = load_model(filepath)
 
     def fit(self, X, y, batch_size=256, epochs=100, filepath='best_model.hdf5'):
@@ -133,8 +133,13 @@ class HybridSpectralNet:
             callbacks=self.callbacks_list
         )
 
-    def predict(self, X, filepath=self.filepath):
-        self.load_model(filepath)
+    def predict(self, X, filepath=None):
+        # assert: self.filepath or filepath must exist
+        if filepath:
+            self.load_model(filepath)
+        else:
+            self.load_model(self.filepath)
+
         self.model.compile(loss='categorical_crossentropy', optimizer=self.adam, metrics=['accuracy'])
         X = X.reshape(
             -1,

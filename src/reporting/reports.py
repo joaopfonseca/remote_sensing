@@ -5,13 +5,13 @@ from sklearn.metrics import (
 )
 
 
-def _make_confusion_matrix(y_true, y_pred, label_mapper):
+def _make_confusion_matrix(y_true, y_pred, target_names):
     """Generates a confusion matrix. Returns 1) Pandas Dataframe with confusion
     matrix, Producer's accuracy and User's accuracy and 2) Pandas Dataframe with
     Overall accuracy, F-Score, and G-mean score."""
-    labels = list(label_mapper.values())
+    labels = list(target_names.values())
     labels.sort()
-    cm = confusion_matrix(y_true.map(label_mapper), pd.Series(y_pred).map(label_mapper), labels=labels).T
+    cm = confusion_matrix(y_true, y_pred, labels=labels).T
     total_h = np.sum(cm, 0)
     total_v = np.sum(cm, 1)
     total   = sum(total_h)
@@ -31,13 +31,16 @@ def _make_confusion_matrix(y_true, y_pred, label_mapper):
                     pd.Series(data=pa, index=labels, name='PA')
                     ])
     core_cm['UA']    = np.append(ua, [np.nan,np.nan])
-    core_cm['UA']    = core_cm['UA'].replace('nan', np.nan) # replace with .2f
+    core_cm['UA']    = core_cm['UA'].replace('nan', np.nan)
     core_cm['Total'] = np.append(total_v, [total, np.nan])
     scores = pd.DataFrame(data= [oa, fscore, gmean], index=['ACCURACY', 'F-SCORE MACRO', 'G-MEAN MACRO'], columns=['Score'])
     return core_cm, scores
 
 
 def reports(y_true, y_pred, target_names):
-    clf_report = classification_report(y_true.astype(int), y_pred.astype(int), target_names=target_names)
-    conf_matrix, scores = _make_confusion_matrix(y_true, y_pred, target_names)
+    y_true = y_true.astype(int)
+    y_pred = y_pred.astype(int)
+    
+    clf_report = classification_report(y_true, y_pred, target_names=target_names)
+    conf_matrix, scores = _make_confusion_matrix(y_true, y_pred, labels=target_names)
     return clf_report, conf_matrix, scores

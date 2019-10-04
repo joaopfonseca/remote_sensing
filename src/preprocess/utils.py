@@ -11,7 +11,7 @@ def ZScoreNormalization(X, axes=(0,1), scorer=None):
     if not scorer:
         u = X.mean(axis=axes)
         std = X.std(axis=axes)
-        scorer = lambda arr: (arr - u / std)
+        scorer = lambda arr: (arr - u) / std
     X_norm = scorer(X)
     return X_norm, scorer
 
@@ -50,7 +50,7 @@ def applyPCA(X, numComponents=10, model=None):
     if model:
         pca = model
         newX = pca.transform(newX)
-    else
+    else:
         pca = PCA(n_components=numComponents, whiten=True)
         newX = pca.fit_transform(newX)
     newX = np.reshape(newX, (X.shape[0],X.shape[1], numComponents))
