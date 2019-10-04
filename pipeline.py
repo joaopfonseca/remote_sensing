@@ -36,10 +36,9 @@ X = coimbrinhas.X_array
 y = coimbrinhas.y_array
 
 ## standardization
-zscore = lambda x, axes: (x - x.mean(axis=axes) / x.std(axis=axes))
 
 i = 5000
-X_sample = zscore(X[i:i+400, i:i+400], axes=(0,1))
+X_sample, zscore = ZScoreNormalization(X[i:i+400, i:i+400], axes=(0,1))
 y_sample = y[i:i+400, i:i+400]
 
 X_sample, pca = applyPCA(X_sample, numComponents=K)
