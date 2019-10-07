@@ -107,7 +107,9 @@ class HybridSpectralNet:
         self.model.summary()
 
     def load_weights(self, filepath):
+        self.filepath = filepath
         self.model = load_model(filepath)
+        self.model.compile(loss='categorical_crossentropy', optimizer=self.adam, metrics=['accuracy'])
 
     def fit(self, X, y, batch_size=256, epochs=100, filepath='best_model.hdf5'):
         # transform matrices to correct format
@@ -136,11 +138,12 @@ class HybridSpectralNet:
     def predict(self, X, filepath=None):
         # assert: self.filepath or filepath must exist
         if filepath:
-            self.load_model(filepath)
-        else:
-            self.load_model(self.filepath)
+            self.load_weights(filepath)
+            self.model.compile(loss='categorical_crossentropy', optimizer=self.adam, metrics=['accuracy'])
+        #else:
+        #    self.load_model(self.filepath)
+        #self.model.compile(loss='categorical_crossentropy', optimizer=self.adam, metrics=['accuracy'])
 
-        self.model.compile(loss='categorical_crossentropy', optimizer=self.adam, metrics=['accuracy'])
         X = X.reshape(
             -1,
             self.height,
@@ -150,6 +153,3 @@ class HybridSpectralNet:
         )
         y_pred = np.argmax(self.model.predict(X), axis=1)
         return y_pred
-
-    def dump(self, fname):
-        pickle.dump(self, open(fname, 'wb'))

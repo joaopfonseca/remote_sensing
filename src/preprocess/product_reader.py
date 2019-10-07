@@ -72,7 +72,7 @@ class SentinelProductReader:
         )
         if type(bands)==list:
             map_arr = self.X_array[:,:,[self.bands.index(x) for x in bands]]
-            pre_map_final = np.clip(map_arr, 0, 3000)/3000
+            map_final = np.clip(map_arr, 0, 3000)/3000
         else:
             map_final = self.X_array[:,:,self.bands.index(bands)]
 
@@ -112,10 +112,10 @@ class SentinelProductReader:
             .to_crs(dict(self.meta[0]['crs']))\
             [[label_col, 'geometry']]
 
-        keys = dict(pd.Series(gdf[label_col].unique()))
+        self.y_labels = dict(pd.Series(gdf[label_col].unique()))
 
-        self.y_labels = {v: k for k, v in keys.items()}
-        gdf[label_col] = gdf[label_col].map(self.y_labels)
+        y_labels_inv = {v: k for k, v in self.y_labels.items()}
+        gdf[label_col] = gdf[label_col].map(y_labels_inv)
         self.y = gdf
 
         return self
@@ -213,6 +213,30 @@ class SentinelProductReader:
                 self.X_labels.append(index)
                 self.meta.append(None)
         return self
+
+    def add_custom_index(self, band1, band2, name='Custom index'):
+        formula = lambda base, var: (base-var)/(base+var)
+        if index not in self.X_labels:
+            base = self.X[self.bands.index(base_band)]
+            var = self.X[self.bands.index(var_band)]
+
+            hw = np.array([arr.shape for arr in [base, var]])
+            idx = hw.argmax(axis=0)[0]
+            height, width = hw[idx]
+            base_var = []
+            for arr in [base, var]:
+                w, h = arr.shape
+                bv_resoluted = np.repeat(arr, repeats=height/h, axis=0)
+                bv_resoluted = np.repeat(bv_resoluted, repeats=width/w, axis=1)
+                base_var.append(bv_resoluted)
+
+            feature = formula(base_var[0], base_var[1])
+
+            self.X.append(feature)
+            self.X_labels.append(index)
+            self.meta.append(None)
+
+
 
     def dump(self, fname):
         pickle.dump(self, open(fname, 'wb'))

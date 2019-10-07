@@ -18,7 +18,7 @@ INTERIM_PATH = 'data/sentinel_coimbra/interim/'
 
 test_ratio = 0.7
 window_size = 25
-read_pickle = False
+read_pickle = True
 random_state = 0
 K=10
 
@@ -29,16 +29,17 @@ if not read_pickle:
         label_col='COS2015_Le' # Much more complex labels, originally was 'Megaclasse'
     )
     coimbrinhas.add_indices(['NDVI', 'NDBI', 'NDMI', 'NDWI'])
+    coimbrinhas.dump(INTERIM_PATH+'coimbra.pkl')
     coimbrinhas.get_X_array()
     coimbrinhas.get_y_array()
-    coimbrinhas.plot()
-    coimbrinhas.to_pandas()
-    coimbrinhas.dump(INTERIM_PATH+'coimbra.pkl')
+    coimbrinhas.plot(alpha=0.5)
 else:
     coimbrinhas = pickle.load(open(INTERIM_PATH+'coimbra.pkl', 'rb'))
+    coimbrinhas.get_X_array()
+    coimbrinhas.get_y_array()
 
 
-
+labels = coimbrinhas.y_labels
 X = coimbrinhas.X_array
 y = coimbrinhas.y_array
 del coimbrinhas
@@ -62,4 +63,9 @@ X_train, X_test, y_train, y_test = split_data(
 
 ConvNet = HybridSpectralNet(input_shape=(window_size, window_size, K), output_units=40)
 ConvNet.fit(X_train, y_train, batch_size=256, epochs=100, filepath='best_model.hdf5')
-ConvNet.classification_report(X_test, y_test.reshape((y_test.shape[0],1)))
+
+y_true = y_test[:1000]
+y_pred = ConvNet.predict(X_test[:1000], filepath='best_model.hdf5')
+reports(y_true, y_pred, labels)
+
+plot_image([X_test, y_true, y_pred])
