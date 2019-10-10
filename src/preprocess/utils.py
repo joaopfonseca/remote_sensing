@@ -15,27 +15,52 @@ def ZScoreNormalization(X, axes=(0,1), scorer=None):
     X_norm = scorer(X)
     return X_norm, scorer
 
+def get_2Dcoordinates_matrix(shape, window_size=None):
+    """
+    pass window size value only if X is padded. If so, excludes coordinates in the padded region
+    """
+    margin = int((window_size - 1) / 2)
+    rows, cols = np.arange(shape[0]), np.arange(shape[1])
+    rows_arr = np.repeat(np.expand_dims(rows,-1), cols.shape[0], axis=1)
+    cols_arr = np.repeat(np.expand_dims(cols, 0), rows.shape[0], axis=0)
+    coords   = np.concatenate(
+            [np.expand_dims(rows_arr, 0),np.expand_dims(cols_arr, 0)]
+            , axis=0)
+    if pad:
+        coords[margin:shape[0]-margin, margin:shape[1]-margin]
+    else:
+        return coords
+
+
+def get_patches(coords, X, y, window_size):
+    """
+    Returns patches with center pixel `coord` and with boudaries
+    [coord[0]-`margin`:coord[0]+`margin`+1, coord[1]-`margin`:coord[1]+`margin`+1]
+    """
+    def _patches(coord, X, y, margin):
+        r, c = coord[0], coord[1]
+        patch = X[r - margin:r + margin + 1, c - margin:c + margin + 1]
+        return patch, y[r-margin, c-margin]
+    return np.apply_along_axis(lambda c: _patches(c, X, y, int(window_size/2)),1,coords)
+
+
+def pad_X(X, window_size):
+    margin = int((window_size - 1) / 2)
+    return np.pad(X, ((margin, margin), (margin, margin), (0,0)))
+
+
 def createImageCubes(X, y, window_size=5, removeNoLabels=True, NoLabelVal=-1):
     """
     Adapted from Hybrid Spectral Net paper.
-    - Assumes padding with Zeros (change later)
+    - Assumes padding with Zeros
     -
     """
     margin = int((window_size - 1) / 2)
     padded_X = np.pad(X, ((margin, margin), (margin, margin), (0,0)))
 
-    rows = np.arange(margin, padded_X.shape[0] - margin)
-    cols = np.arange(margin, padded_X.shape[1] - margin)
-    rows_arr = np.repeat(np.expand_dims(rows,-1), cols.shape[0], axis=1)
-    cols_arr = np.repeat(np.expand_dims(cols, 0), rows.shape[0], axis=0)
-    coords   = np.concatenate(
-                [np.expand_dims(rows_arr, 0),np.expand_dims(cols_arr, 0)]
-                , axis=0)\
-                .reshape((2,rows.shape[0]*cols.shape[0])).T
-    def get_patches(val):
-        r, c = val[0], val[1]
-        patch = padded_X[r - margin:r + margin + 1, c - margin:c + margin + 1]
-        return patch, y[r-margin, c-margin]
+    coords = get_2Dcoordinates_matrix(padded_X.shape)\
+        [margin:padded_X.shape[0]-margin, margin:padded_X.shape[1]-margin]\
+        .reshape((2,rows.shape[0]*cols.shape[0])).T
 
     patchesData, patchesLabels = np.apply_along_axis(get_patches, 1 ,coords).T
     patchesData = np.stack(patchesData)
@@ -44,6 +69,7 @@ def createImageCubes(X, y, window_size=5, removeNoLabels=True, NoLabelVal=-1):
         patchesData = patchesData[patchesLabels!=NoLabelVal,:,:,:]
         patchesLabels = patchesLabels[patchesLabels!=NoLabelVal]
     return patchesData, patchesLabels
+
 
 def applyPCA(X, numComponents=10, model=None):
     newX = np.reshape(X, (-1, X.shape[2]))
