@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import pandas as pd
 import geopandas as gpd
-
+from .utils import get_2Dcoordinates_matrix
 
 class SentinelProductReader:
     """
@@ -57,6 +57,7 @@ class SentinelProductReader:
             for band in self.bands:
                 band_path = os.path.join(bands_path, b_prefix+band+'.jp2')
                 self.add_band(band_path)
+            self.get_X_array()
 
         if labels_shapefile and label_col:
             self.add_labels(labels_shapefile, label_col)
@@ -117,7 +118,7 @@ class SentinelProductReader:
         y_labels_inv = {v: k for k, v in self.y_labels.items()}
         gdf[label_col] = gdf[label_col].map(y_labels_inv)
         self.y = gdf
-
+        self.get_y_array()
         return self
 
     def add_band(self, band_path):
@@ -174,11 +175,12 @@ class SentinelProductReader:
         # assertion:
         # check if X_array exists, else run get_X_array
         # check if y_array exists, else don't add label column
-        columns = self.bands+[self.label_col]
+        columns = ['x', 'y']+self.bands+[self.label_col]
         shp  = self.X_array.shape
-        X_reshaped = np.reshape(self.X_array, (shp[0], shp[1]*shp[2]))
-        y_reshaped = np.reshape(self.y_array, (1, shp[1]*shp[2]))
-        data = np.concatenate([X_reshaped, y_reshaped])
+        coords = get_2Dcoordinates_matrix(shp).reshape(2, shp[0]*shp[1])
+        X_reshaped = self.X_array.reshape((shp[2], shp[0]*shp[1]))
+        y_reshaped = self.y_array.reshape((1, shp[0]*shp[1]))
+        data = np.concatenate([coords, X_reshaped, y_reshaped])
         return pd.DataFrame(data=data.T, columns=columns)
 
     def add_indices(self, indices=['NDVI', 'NDBI', 'NDMI', 'NDWI']):
@@ -236,7 +238,8 @@ class SentinelProductReader:
             self.X_labels.append(index)
             self.meta.append(None)
 
-
-
     def dump(self, fname):
+        del self.X_array, self.y_array
         pickle.dump(self, open(fname, 'wb'))
+        self.get_X_array()
+        self.get_y_array()
