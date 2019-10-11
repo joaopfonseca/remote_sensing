@@ -19,29 +19,29 @@ def get_2Dcoordinates_matrix(shape, window_size=None):
     """
     pass window size value only if X is padded. If so, excludes coordinates in the padded region
     """
-    margin = int((window_size - 1) / 2)
     rows, cols = np.arange(shape[0]), np.arange(shape[1])
     rows_arr = np.repeat(np.expand_dims(rows,-1), cols.shape[0], axis=1)
     cols_arr = np.repeat(np.expand_dims(cols, 0), rows.shape[0], axis=0)
     coords   = np.concatenate(
             [np.expand_dims(rows_arr, 0),np.expand_dims(cols_arr, 0)]
             , axis=0)
-    if pad:
-        coords[margin:shape[0]-margin, margin:shape[1]-margin]
+    if window_size:
+        margin = int((window_size - 1) / 2)
+        return coords[:,margin:shape[0]-margin, margin:shape[1]-margin]
     else:
         return coords
 
 
-def get_patches(coords, X, y, window_size):
+def get_patches(coords, X, window_size):
     """
     Returns patches with center pixel `coord` and with boudaries
     [coord[0]-`margin`:coord[0]+`margin`+1, coord[1]-`margin`:coord[1]+`margin`+1]
     """
-    def _patches(coord, X, y, margin):
+    def _patches(coord, X, margin):
         r, c = coord[0], coord[1]
         patch = X[r - margin:r + margin + 1, c - margin:c + margin + 1]
-        return patch, y[r-margin, c-margin]
-    return np.apply_along_axis(lambda c: _patches(c, X, y, int(window_size/2)),1,coords)
+        return patch
+    return np.apply_along_axis(lambda c: _patches(c, X, int(window_size/2)),1,coords)
 
 
 def pad_X(X, window_size):

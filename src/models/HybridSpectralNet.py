@@ -105,7 +105,9 @@ class HybridSpectralNet:
         self.adam = Adam(lr=0.001, decay=1e-06)
         self.model.compile(loss='categorical_crossentropy', optimizer=self.adam, metrics=['accuracy'])
         self.model.summary()
-        checkpoint = ModelCheckpoint(filepath, monitor='accuracy', verbose=1, save_best_only=True, mode='max')
+        abspath = os.path.abspath('.')
+        self.filepath = os.path.abspath(os.path.join(abspath,filepath))
+        checkpoint = ModelCheckpoint(self.filepath, monitor='accuracy', verbose=1, save_best_only=True, mode='max')
         self.callbacks_list = [checkpoint]
 
     def load_weights(self, filepath):
@@ -115,8 +117,6 @@ class HybridSpectralNet:
 
     def fit(self, X, y, batch_size=256, epochs=100):
         # transform matrices to correct format
-        abspath = os.path.abspath('.')
-        self.filepath = os.path.abspath(os.path.join(abspath,filepath))
         self.num_bands = X.shape[-1]
         self.X = X.reshape(
             -1,
