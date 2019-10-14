@@ -177,8 +177,8 @@ class SentinelProductReader:
         # check if y_array exists, else don't add label column
         columns = ['x', 'y']+self.bands+[self.label_col]
         shp  = self.X_array.shape
-        coords = get_2Dcoordinates_matrix(shp).reshape(2, shp[0]*shp[1])
-        X_reshaped = self.X_array.reshape((shp[2], shp[0]*shp[1]))
+        coords = get_2Dcoordinates_matrix(shp).swapaxes(0,1).reshape(2, shp[0]*shp[1])
+        X_reshaped = self.X_array.T.reshape((shp[2], shp[0]*shp[1]))
         y_reshaped = self.y_array.reshape((1, shp[0]*shp[1]))
         data = np.concatenate([coords, X_reshaped, y_reshaped])
         return pd.DataFrame(data=data.T, columns=columns)
