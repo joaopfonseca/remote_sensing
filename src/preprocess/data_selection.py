@@ -1,4 +1,5 @@
-
+import pandas as pd
+import numpy as np
 from sklearn.metrics import calinski_harabasz_score
 from minisom import MiniSom
 
@@ -20,7 +21,11 @@ def find_optimal_architecture_and_cluster(X, nodes, random_state=None):
     CH_score = []
     for architecture in nodes:
         labels = SOM_clustering(X,architecture,random_state=random_state)[-1]
+        # Paris et al. 2019 uses the Calinski Harabasz index to identify the number of clusters to use
         score = calinski_harabasz_score(X, labels)
         label_list.append(labels)
         CH_score.append(score)
     return label_list[np.argmax(CH_score)]
+
+def get_keep_discard_pixels(labels):
+    pd.Series(labels)
