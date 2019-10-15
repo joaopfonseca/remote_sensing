@@ -2,6 +2,10 @@
 import pandas as pd
 from src.preprocess.readers import SentinelProductReader
 from src.preprocess.utils import get_2Dcoordinates_matrix
+from src.preprocess.data_selection import (
+    find_optimal_architecture_and_cluster,
+    get_keep_discard_pixels
+)
 from src.reporting.visualize import plot_image
 
 
@@ -47,45 +51,58 @@ else:
 # drop unlabelled pixels
 df = df[df['Megaclasse']!=-1]
 
-# get specific example
-polygon = df[df['ID']==33764].reset_index() #30636, 15440, 6946, 36403, 33764
-polygon2 = polygon[['B01', 'B03', 'B02', 'B06', 'B12', 'B07', 'B11', 'B05', 'B04',
-       'B10', 'TCI', 'B09', 'B08', 'B8A']]
-
+# get specific examples
+polygons = df[(df['ID']>3279)&(df['ID']<15440)] #30636, 15440, 6946, 36403, 33764
 
 ## Unsupervised Training Sets Identification: Altered version from Paris et al. 2019
+def get_all_clusters(df, id_col):
+    df = df.sort_values(by=id_col)
+    polygon_list = np.split(df.drop(columns=[id_col]), np.where(np.diff(df[id_col]))[0]+1)
 
-# Polygon clustering (SOM)
-som_architectures = get_2Dcoordinates_matrix((4,4)).reshape((2,-1))
-som_architectures = som_architectures[:,np.apply_along_axis(lambda x: (x!=0).all() and (x!=1).any(), 0, som_architectures)]
-labels = find_optimal_architecture_and_cluster(polygon2.values, som_architectures.T, 0)
+    som_architectures = get_2Dcoordinates_matrix((4,4)).reshape((2,-1))
+    som_architectures = som_architectures[:,np.apply_along_axis(lambda x: (x!=0).all() and (x!=1).any(), 0, som_architectures)]
+    # Polygon clustering (SOM)
+    labels = []
+    for polygon in polygon_list:
+        _labels = find_optimal_architecture_and_cluster(polygon.values, som_architectures.T, 0)
+        # use get_keep_discard_pixels if only the majority cluster is being passed for consistency analysis
+        labels.append(_labels)#get_keep_discard_pixels(_labels))
+    return pd.Series(data=np.concatenate(labels), index=df.index, name='label')
 
-# Take dominant cluster
-polygon['label'] = pd.Series(labels)
-labels_premapper = polygon.groupby(['label']).size().sort_values(ascending=False).to_frame()
-labels_premapper['labels_choice'] = ['keep']+['discard' for i in range(len(labels_premapper)-1)]
-mapper = labels_premapper[['labels_choice']].to_dict()['labels_choice']
-polygon['status'] = polygon['label'].map(mapper)
+
+bands = polygons[['B01', 'B03', 'B02', 'B06', 'B12', 'B07', 'B11', 'B05', 'B04',
+       'B10', 'TCI', 'B09', 'B08', 'B8A', 'ID']]
+labels = get_all_clusters(bands, 'ID')
+polygons = polygons.join()
+polygons['label'] = polygons['ID'].astype(str)+'_'+polygons['label'].astype(str)
+
+# Polygon Consistency Analysis
+polygon_clusters = polygons.groupby(['label']).mean()
+polygon_clusters.join(get_all_clusters(polygon_clusters, 'Megaclasse'))
+
+
+
+
+# Bhattacharyya distance for each cluster to determine its distance from the the whole set of clusters
+
+
+# test - plot results on specific polygon
+polygon = polygons[polygons['ID']==3279] #30636, 15440, 6946, 36403, 33764
 
 plt_res = polygon[['x', 'y']] - polygon[['x', 'y']].min()
 plt_res[['B02', 'B03', 'B04']] = polygon[['B02', 'B03', 'B04']].clip(0,3000)/3000
-plt_res['status'] = polygon['status']
+plt_res['label'] = polygon['label']
 
-
-
-# plot results on specific polygon
 img = np.array([plt_res.pivot('x', 'y', band).values for band in ['B04', 'B03', 'B02']]).T
-_accepted = (plt_res.pivot('x','y','status').values=='keep').T.astype(float)
+_accepted = (plt_res.pivot('x','y','label').values=='keep').T.astype(float)
 accepted = img*np.array([_accepted for i in range(3)]).T.swapaxes(0,1)
-_rejected = (plt_res.pivot('x','y','status').values!='keep').T.astype(float).T.swapaxes(0,1)
+_rejected = (plt_res.pivot('x','y','label').values!='keep').T.astype(float).T.swapaxes(0,1)
 rejected = img*np.array([_rejected for i in range(3)]).T.swapaxes(0,1)
 plot_image([img, rejected, accepted], num_rows=1, figsize=(40, 20), dpi=20)
 
 
 
 
-# Polygon Consistency Analysis
-# Bhattacharyya distance for each cluster to determine its distance from the the whole set of clusters
 
 # Select only the clusters within the 65th percentile of the cluster distances
 
