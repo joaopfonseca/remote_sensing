@@ -55,53 +55,49 @@ df = df[df['Megaclasse']!=-1]
 polygons = df[(df['ID']>3279)&(df['ID']<15440)] #30636, 15440, 6946, 36403, 33764
 
 ## Unsupervised Training Sets Identification: Altered version from Paris et al. 2019
-def get_all_clusters(df, id_col):
+def get_all_clusters(df, id_col, keep_discard_labels=False):
     df = df.sort_values(by=id_col)
     polygon_list = np.split(df.drop(columns=[id_col]), np.where(np.diff(df[id_col]))[0]+1)
+    # drop polygons with too few pixels to be relevant for classification
+    polygon_list = [x for x in polygon_list if len(x)>=10]
 
     som_architectures = get_2Dcoordinates_matrix((4,4)).reshape((2,-1))
     som_architectures = som_architectures[:,np.apply_along_axis(lambda x: (x!=0).all() and (x!=1).any(), 0, som_architectures)]
     # Polygon clustering (SOM)
     labels = []
+    indices = []
+    total = len(polygon_list) # testing
+    i=1
     for polygon in polygon_list:
+        print(f'Clustering process: {i}/{total}'); i+=1
+        indices.append(polygon.index)
         _labels = find_optimal_architecture_and_cluster(polygon.values, som_architectures.T, 0)
         # use get_keep_discard_pixels if only the majority cluster is being passed for consistency analysis
-        labels.append(_labels)#get_keep_discard_pixels(_labels))
-    return pd.Series(data=np.concatenate(labels), index=df.index, name='label')
+        if keep_discard_labels:
+            labels.append(get_keep_discard_pixels(_labels))
+            return pd.Series(data=np.concatenate(labels), index=np.concatenate(indices), name='status')
+        else:
+            labels.append(_labels)#get_keep_discard_pixels(_labels))
+            return pd.Series(data=np.concatenate(labels), index=np.concatenate(indices), name='label')
 
 
 bands = polygons[['B01', 'B03', 'B02', 'B06', 'B12', 'B07', 'B11', 'B05', 'B04',
        'B10', 'TCI', 'B09', 'B08', 'B8A', 'ID']]
 labels = get_all_clusters(bands, 'ID')
-polygons = polygons.join()
+polygons = polygons.join(labels)
 polygons['label'] = polygons['ID'].astype(str)+'_'+polygons['label'].astype(str)
 
 # Polygon Consistency Analysis
-polygon_clusters = polygons.groupby(['label']).mean()
-polygon_clusters.join(get_all_clusters(polygon_clusters, 'Megaclasse'))
-
-
-
+megaclasse_clusters = polygons[['label', 'Megaclasse']].drop_duplicates().set_index('label')
+polygon_clusters = polygons[['B01', 'B03', 'B02', 'B06', 'B12', 'B07', 'B11', 'B05', 'B04',
+       'B10', 'TCI', 'B09', 'B08', 'B8A', 'label']]\
+       .groupby(['label']).mean()
+polygon_clusters = polygon_clusters.join(megaclasse_clusters)
+clusters_mapper = polygon_clusters.join(get_all_clusters(polygon_clusters, 'Megaclasse', keep_discard_labels=True))
+mapper = clusters_mapper['status'].to_dict()
+polygons['status'] = polygons['label'].map(mapper)
 
 # Bhattacharyya distance for each cluster to determine its distance from the the whole set of clusters
-
-
-# test - plot results on specific polygon
-polygon = polygons[polygons['ID']==3279] #30636, 15440, 6946, 36403, 33764
-
-plt_res = polygon[['x', 'y']] - polygon[['x', 'y']].min()
-plt_res[['B02', 'B03', 'B04']] = polygon[['B02', 'B03', 'B04']].clip(0,3000)/3000
-plt_res['label'] = polygon['label']
-
-img = np.array([plt_res.pivot('x', 'y', band).values for band in ['B04', 'B03', 'B02']]).T
-_accepted = (plt_res.pivot('x','y','label').values=='keep').T.astype(float)
-accepted = img*np.array([_accepted for i in range(3)]).T.swapaxes(0,1)
-_rejected = (plt_res.pivot('x','y','label').values!='keep').T.astype(float).T.swapaxes(0,1)
-rejected = img*np.array([_rejected for i in range(3)]).T.swapaxes(0,1)
-plot_image([img, rejected, accepted], num_rows=1, figsize=(40, 20), dpi=20)
-
-
-
 
 
 # Select only the clusters within the 65th percentile of the cluster distances
@@ -110,3 +106,25 @@ plot_image([img, rejected, accepted], num_rows=1, figsize=(40, 20), dpi=20)
 
 
 # Stratified Random Sampling: Generate balanced training sets proportionate to the original prior probabilities of the land-cover classes
+
+
+
+
+
+
+
+
+
+# test - plot results on specific polygon
+polygon = polygons[polygons['ID']==15387] #6707, 15390, 15387, 14025, 14024,  7831,  6701,  7832
+
+plt_res = polygon[['x', 'y']] - polygon[['x', 'y']].min()
+plt_res[['B02', 'B03', 'B04']] = polygon[['B02', 'B03', 'B04']].clip(0,3000)/3000
+plt_res['status'] = polygon['status']
+
+img = np.array([plt_res.pivot('x', 'y', band).values for band in ['B04', 'B03', 'B02']]).T
+_accepted = (plt_res.pivot('x','y','status').values=='keep').T.astype(float)
+accepted = img*np.array([_accepted for i in range(3)]).T.swapaxes(0,1)
+_rejected = (plt_res.pivot('x','y','status').values!='keep').T.astype(float).T.swapaxes(0,1)
+rejected = img*np.array([_rejected for i in range(3)]).T.swapaxes(0,1)
+plot_image([img, rejected, accepted], num_rows=1, figsize=(40, 20), dpi=20)
