@@ -7,7 +7,7 @@ from src.preprocess.data_selection import (
     get_keep_discard_pixels
 )
 from src.reporting.visualize import plot_image
-
+from src.preprocess.data_selection import pixel_selection
 
 ## configs
 DATA_PATH = 'data/sentinel_coimbra/raw/'
@@ -55,8 +55,13 @@ df = df[df['Megaclasse']!=-1]
 polygons = df[(df['ID']>3279)&(df['ID']<15440)] #30636, 15440, 6946, 36403, 33764
 
 ## Unsupervised Training Sets Identification: Altered version from Paris et al. 2019
+ps = pixel_selection(df, 'ID', 'Megaclasse')
+ps.get_clusters(method='SOM', cluster_col='clusters', random_state=0)
+ps.get_consistency_analysis('status', method='SOM', random_state=0)
+
+
+###### old code
 def get_all_clusters(df, id_col, keep_discard_labels=False):
-    df = df.sort_values(by=id_col)
     polygon_list = np.split(df.drop(columns=[id_col]), np.where(np.diff(df[id_col]))[0]+1)
     # drop polygons with too few pixels to be relevant for classification
     polygon_list = [x for x in polygon_list if len(x)>=10]
@@ -96,6 +101,7 @@ polygon_clusters = polygon_clusters.join(megaclasse_clusters)
 clusters_mapper = polygon_clusters.join(get_all_clusters(polygon_clusters, 'Megaclasse', keep_discard_labels=True))
 mapper = clusters_mapper['status'].to_dict()
 polygons['status'] = polygons['label'].map(mapper)
+#######
 
 # Bhattacharyya distance for each cluster to determine its distance from the the whole set of clusters
 
