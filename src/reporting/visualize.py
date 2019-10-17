@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def _plot_image(X, figsize=(20, 20), dpi=80, *args):
-    if X.ndim==3 and (X>3000).any():
+    if X.ndim==3 and ((X>1000.0).any() or (X<0.0).any()):
         X = np.clip(X, 0, 3000)/3000
     plt.imshow(
         X,

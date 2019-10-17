@@ -18,17 +18,17 @@ class pixel_selection:
         self.class_col = class_col
         self.df = df.sort_values(by=self._polygon_id)
 
-        if df[self._polygon_id].dtype == np.dtype('O'):
+        if self.df[self._polygon_id].dtype == np.dtype('O'):
             self.is_string_identifier = True
             self.label_encoder = LabelEncoder().fit(self.df['Label'])
-            df[self._polygon_id] = self.label_encoder.transform(df[self._polygon_id])
+            self.df[self._polygon_id] = self.label_encoder.transform(self.df[self._polygon_id])
         else:
             self.is_string_identifier = False
 
         if class_col: drop_cols = [self._polygon_id, self.class_col]
         else: drop_cols = [self._polygon_id]
 
-        polygon_list = np.split(df.drop(columns=drop_cols), np.where(np.diff(df[self._polygon_id]))[0]+1)
+        polygon_list = np.split(self.df.drop(columns=drop_cols), np.where(np.diff(self.df[self._polygon_id]))[0]+1)
         # drop polygons with too few pixels to be relevant for classification
         self._polygon_list = [x for x in polygon_list if len(x)>=10]
 
@@ -82,6 +82,7 @@ class pixel_selection:
         class_wide_clusters = self.df.drop(columns=[self._polygon_id, self.class_col]).groupby([self.cluster_col]).mean()
         class_wide_clusters = class_wide_clusters.join(pre_class_wide_clusters)
         self._df = self.df
+
         self.__init__(class_wide_clusters, self.class_col)
         cluster_info = self.get_clusters(method=method, cluster_col=consistency_col, identify_dominant_cluster=True, random_state=random_state)
         mapper = cluster_info[consistency_col].to_dict()
