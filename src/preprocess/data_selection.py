@@ -129,14 +129,14 @@ def SOM_find_optimal_architecture_and_cluster(X, nodes, random_state=None):
             label_list.append(labels)
             CH_score.append(score)
     return label_list[np.argmax(CH_score)]
-    
+
 
 def KMeans_find_optimal_k_and_cluster(X, k_max=12, random_state=None):
     label_list = []
     CH_score = []
     for k in range(2,k_max+1):
         if X.shape[0] >= k:
-            labels = KMeans(n_clusters=k, n_init=1, max_iter=150, random_state=random_state, n_jobs=-1).fit_predict(X)
+            labels = KMeans(n_clusters=k, n_init=10, max_iter=300, random_state=random_state, n_jobs=None).fit_predict(X)
             score = calinski_harabasz_score(X, labels)
             label_list.append(labels)
             CH_score.append(score)
