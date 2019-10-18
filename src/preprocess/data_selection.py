@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
+from copy import deepcopy
 from sklearn.metrics import calinski_harabasz_score
+from sklearn.cluster import KMeans
 from minisom import MiniSom
 from sklearn.preprocessing import LabelEncoder
 
@@ -13,7 +15,7 @@ class pixel_selection:
         assert type(df)==pd.DataFrame, 'df needs to be of type `pd.DataFrame`.'
         assert type(polygon_id_col)==str and type(class_col) in [str, type(None)], 'Both polygon_id_col and class_col need to be of type `str`.'
         assert polygon_id_col in df.columns, f'{polygon_id_col} not in dataframe.'
-
+        self.methods = ['som', 'paris', 'kmeans']
         self._polygon_id = polygon_id_col
         self.class_col = class_col
         self.df = df.sort_values(by=self._polygon_id)
@@ -34,10 +36,9 @@ class pixel_selection:
 
     def get_clusters(self, method='SOM', cluster_col='clusters', identify_dominant_cluster=False, random_state=None):
         """stage 1"""
-        methods = ['SOM']
-        assert method in methods, f'Method {method} not implemented. Possible options are {methods}'
+        assert method in self.methods, f'Method {method} not implemented. Possible options are {methods}'
 
-        if method == 'SOM':
+        if method == 'som':
             som_architectures = get_2Dcoordinates_matrix((5,5)).reshape((2,-1))
             som_architectures = som_architectures[:,np.apply_along_axis(lambda x: (x!=0).all() and (x!=1).any(), 0, som_architectures)]
             # Polygon clustering (SOM)
@@ -48,7 +49,24 @@ class pixel_selection:
             for polygon in self._polygon_list:
                 print(f'Clustering process: {i}/{total}'); i+=1
                 indices.append(polygon.index)
-                _labels = find_optimal_architecture_and_cluster(polygon.values, som_architectures.T, random_state)
+                _labels = SOM_find_optimal_architecture_and_cluster(polygon.values, som_architectures.T, random_state)
+                # generally you will want to use get_dominant_pixels only if the majority cluster is being passed for consistency analysis
+                if identify_dominant_cluster:
+                    labels.append(get_dominant_pixels(_labels))
+                else:
+                    labels.append(_labels)
+        elif method == 'paris':
+            raise ValueError('method not yet implemented')
+        elif method == 'kmeans':
+            labels = []
+            indices = []
+            total = len(self._polygon_list)  # testing
+            i = 1
+            for polygon in self._polygon_list:
+                print(f'Clustering process: {i}/{total}')
+                i += 1
+                indices.append(polygon.index)
+                _labels = KMeans_find_optimal_k_and_cluster(polygon.values, 12, random_state)
                 # generally you will want to use get_dominant_pixels only if the majority cluster is being passed for consistency analysis
                 if identify_dominant_cluster:
                     labels.append(get_dominant_pixels(_labels))
@@ -69,23 +87,23 @@ class pixel_selection:
         - SOM: Runs clustering based on Kohonen self-organizing maps
         - Bhattacharyya: Distance based selection (keeps 65% of the clusters closest to the "centroid of centroids")
         """
-        methods = ['SOM', 'Bhattacharyya']
         if class_col: self.class_col = class_col
         if cluster_col: self.cluster_col = cluster_col
         assert self.cluster_col in self.df.columns, f'No columns with cluster id detected ({self.cluster_col}). Run self.get_clusters or manually add column with cluster values (pass column name on `cluster_col`)'
         assert type(self.cluster_col)!=type(None), '`cluster_col` is not defined.'
-        assert method in methods, f'Method {method} not implemented. Possible options are {methods}'
+        assert method in self.methods, f'Method {method} not implemented. Possible options are {methods}'
         assert self.class_col in self.df.columns, f'{class_col} not in dataframe.'
 
-        self._previous_cluster_col = self.class_col
+        self._previous_cluster_col = deepcopy(self.cluster_col)
+        self._df = deepcopy(self.df)
         pre_class_wide_clusters = self.df[[self.cluster_col, self.class_col]].drop_duplicates().set_index(self.cluster_col)
         class_wide_clusters = self.df.drop(columns=[self._polygon_id, self.class_col]).groupby([self.cluster_col]).mean()
         class_wide_clusters = class_wide_clusters.join(pre_class_wide_clusters)
-        self._df = self.df
 
         self.__init__(class_wide_clusters, self.class_col)
         cluster_info = self.get_clusters(method=method, cluster_col=consistency_col, identify_dominant_cluster=True, random_state=random_state)
-        mapper = cluster_info[consistency_col].to_dict()
+        mapper = cluster_info[consistency_col].apply(lambda x: x.split('_')[-1]=='True')\
+            .astype(int).to_dict()
         self._df[consistency_col] = self._df[self._previous_cluster_col].map(mapper)
         return self._df, cluster_info
 
@@ -93,7 +111,6 @@ class pixel_selection:
 
 def SOM_clustering(X, grid_shape, random_state=None):
     # setup SOM
-    n_nodes = grid_shape[0]*grid_shape[1]
     som = MiniSom(grid_shape[0],grid_shape[1],X.shape[1],sigma=0.8,learning_rate=0.6,random_seed=random_state)
     # fit SOM
     som.train_random(X, 2000)
@@ -101,13 +118,25 @@ def SOM_clustering(X, grid_shape, random_state=None):
     labels = np.apply_along_axis(som.winner, 1, X).astype(str)
     return np.char.add(labels[:,0], labels[:,1])
 
-def find_optimal_architecture_and_cluster(X, nodes, random_state=None):
+def SOM_find_optimal_architecture_and_cluster(X, nodes, random_state=None):
     label_list = []
     CH_score = []
     for architecture in nodes:
         if X.shape[0]>=architecture[0]*architecture[1]:
             labels = SOM_clustering(X,architecture,random_state=random_state)
             # Paris et al. 2019 uses the Calinski Harabasz index to identify the number of clusters to use
+            score = calinski_harabasz_score(X, labels)
+            label_list.append(labels)
+            CH_score.append(score)
+    return label_list[np.argmax(CH_score)]
+    
+
+def KMeans_find_optimal_k_and_cluster(X, k_max=12, random_state=None):
+    label_list = []
+    CH_score = []
+    for k in range(2,k_max+1):
+        if X.shape[0] >= k:
+            labels = KMeans(n_clusters=k, n_init=1, max_iter=150, random_state=random_state, n_jobs=-1).fit_predict(X)
             score = calinski_harabasz_score(X, labels)
             label_list.append(labels)
             CH_score.append(score)
