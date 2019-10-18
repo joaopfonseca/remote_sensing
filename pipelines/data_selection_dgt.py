@@ -28,11 +28,6 @@ df = df[labels_coords_cols+band_cols]
 ## drop rows with missing values
 df = df.dropna()
 
-## sample for testing
-#df = df[(df['Object']>30079)&(df['Object']<64329)]
-
-## William's reference polygons: 71125 (conifers), 8458 (baresoil)
-
 ## run pixel_selection method 1: SOM+SOM
 ps = pixel_selection(df, polygon_id_col='Object', class_col='Label')
 ps.get_clusters(method='SOM', cluster_col='clusters', random_state=0)
@@ -46,6 +41,7 @@ df_selection.to_csv(RESULTS_PATH) # save results
 
 ## run pixel_selection method 4: K-means+SOM
 
+## William's reference polygons: 71125 (conifers), 8458 (baresoil)
 ## plot results
 obj = df_selection[df_selection['Object']==8458]
 obj[['X','Y']] = ((obj[['X','Y']] - obj[['X','Y']].min()) / 10).astype(int)
