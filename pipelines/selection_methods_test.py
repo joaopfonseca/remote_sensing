@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from src.preprocess.data_selection import pixel_selection
 from src.reporting.visualize import plot_image
-from sklearn.preprocessing import LabelEncoder
 
 ## configs
 DATA_PATH = 'data/DGT/'

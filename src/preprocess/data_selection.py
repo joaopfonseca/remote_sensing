@@ -10,7 +10,7 @@ from .utils import get_2Dcoordinates_matrix
 
 
 class pixel_selection:
-    def __init__(self, df, polygon_id_col, class_col=None):
+    def __init__(self, df, polygon_id_col, class_col=None, som_architecture=None, k_max=12):
         """df must have only band values, polygon_id_col and class_col"""
         assert type(df)==pd.DataFrame, 'df needs to be of type `pd.DataFrame`.'
         assert type(polygon_id_col)==str and type(class_col) in [str, type(None)], 'Both polygon_id_col and class_col need to be of type `str`.'
@@ -20,9 +20,12 @@ class pixel_selection:
         self._polygon_id = polygon_id_col
         self.class_col = class_col
         self.df = df.sort_values(by=self._polygon_id)
-        self.k = 12
-        self.som_architectures = get_2Dcoordinates_matrix((5,5)).reshape((2,-1))
-        self.som_architectures = self.som_architectures[:,np.apply_along_axis(lambda x: (x!=0).all() and (x!=1).any(), 0, self.som_architectures)].T
+        self.k = k_max
+        if som_architecture:
+            self.som_architectures = np.expand_dims(np.array(som_architecture), 0)
+        else:
+            self.som_architectures = get_2Dcoordinates_matrix((5,5)).reshape((2,-1))
+            self.som_architectures = self.som_architectures[:,np.apply_along_axis(lambda x: (x!=0).all() and (x!=1).any(), 0, self.som_architectures)].T
 
         if self.df[self._polygon_id].dtype == np.dtype('O'):
             self.is_string_identifier = True
@@ -36,15 +39,16 @@ class pixel_selection:
 
         polygon_list = np.split(self.df.drop(columns=drop_cols), np.where(np.diff(self.df[self._polygon_id]))[0]+1)
         # drop polygons with too few pixels to be relevant for classification
-        self._polygon_list = [x for x in polygon_list if len(x)>=10]
+        self._polygon_list = [x for x in polygon_list]# if len(x)>=10]
 
-    def get_clusters(self, method='SOM', cluster_col='clusters', identify_dominant_cluster=False, random_state=None):
+    def get_clusters(self, method='som', cluster_col='clusters', identify_dominant_cluster=False, random_state=None):
         """stage 1"""
         assert method in self.methods, f'Method {method} not implemented. Possible options are {methods}'
         assert self._previous_cluster_col or method!='bhattacharyya', f'bhattacharyya method should only be used for consistency analysis.'
 
         if method == 'som':
             # Polygon clustering (SOM)
+            self.som_list = []
             labels = []
             indices = []
             total = len(self._polygon_list) # testing
@@ -52,7 +56,8 @@ class pixel_selection:
             for polygon in self._polygon_list:
                 print(f'Clustering process: {i}/{total}'); i+=1
                 indices.append(polygon.index)
-                _labels = SOM_find_optimal_architecture_and_cluster(polygon.values, self.som_architectures, random_state)
+                _labels, som = SOM_find_optimal_architecture_and_cluster(polygon.values, self.som_architectures, random_state)
+                self.som_list.append(som)
                 # generally you will want to use get_dominant_pixels only if the majority cluster is being passed for consistency analysis
                 if identify_dominant_cluster:
                     labels.append(get_dominant_pixels(_labels))
@@ -108,7 +113,7 @@ class pixel_selection:
         self.df[self.cluster_col] = self.df[self._polygon_id].astype(str)+'_'+self.df[self.cluster_col].astype(str)
         return self.df
 
-    def get_consistency_analysis(self, consistency_col, method='SOM', class_col=None, cluster_col=None, random_state=None):
+    def get_consistency_analysis(self, consistency_col, method='som', class_col=None, cluster_col=None, random_state=None, som_architecture=None, k_max=None):
         """
         stage 2
         - SOM: Runs clustering based on Kohonen self-organizing maps
@@ -131,7 +136,17 @@ class pixel_selection:
 
         self.__init__(class_wide_clusters, self.class_col)
 
-        self.k = 2
+        if som_architecture:
+            self.som_architectures = np.expand_dims(np.array(som_architecture), 0)
+        else:
+            self.som_architectures = get_2Dcoordinates_matrix((5,5)).reshape((2,-1))
+            self.som_architectures = self.som_architectures[:,np.apply_along_axis(lambda x: (x!=0).all() and (x!=1).any(), 0, self.som_architectures)].T
+
+        if k_max:
+            self.k = k_max
+        else:
+            self.k = 2
+
         cluster_info = self.get_clusters(method=method, cluster_col=consistency_col, identify_dominant_cluster=True, random_state=random_state)
         mapper = cluster_info[consistency_col].apply(lambda x: x.split('_')[-1]=='True')\
             .astype(int).to_dict()
@@ -146,19 +161,31 @@ def SOM_clustering(X, grid_shape, random_state=None):
     som.train_random(X, 2000)
     # assign labels to node
     labels = np.apply_along_axis(som.winner, 1, X).astype(str)
-    return np.char.add(labels[:,0], labels[:,1])
+    return np.char.add(labels[:,0], labels[:,1]), som
 
 def SOM_find_optimal_architecture_and_cluster(X, nodes, random_state=None):
     label_list = []
     CH_score = []
+    som_list = []
     for architecture in nodes:
         if X.shape[0]>=architecture[0]*architecture[1]:
-            labels = SOM_clustering(X,architecture,random_state=random_state)
-            # Paris et al. 2019 uses the Calinski Harabasz index to identify the number of clusters to use
+            labels, som = SOM_clustering(X,architecture,random_state=random_state)
+            # Paris et al. 2019 uses the Calinski Harabasz score to identify the number of clusters to use
             score = calinski_harabasz_score(X, labels)
             label_list.append(labels)
             CH_score.append(score)
-    return label_list[np.argmax(CH_score)]
+            som_list.append(som)
+
+    while len(label_list)==0:
+        nodes = np.clip(nodes-1, 1, None)
+        for architecture in nodes:
+            if X.shape[0]>=architecture[0]*architecture[1]:
+                labels, som = SOM_clustering(X,architecture,random_state=random_state)
+                label_list.append(labels)
+                CH_score.append(0)
+                som_list.append(som)
+
+    return label_list[np.argmax(CH_score)], som_list[np.argmax(CH_score)]
 
 
 def find_optimal_k_and_cluster(X, k_max=12, method='kmeans', random_state=None):
