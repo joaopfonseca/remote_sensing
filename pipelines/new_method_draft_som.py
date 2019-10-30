@@ -40,7 +40,7 @@ MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 RESULTS_PATH = DATA_PATH+'processed'
 
 som_outlier_detection = False
-plot_quantization_errors = True
+plot_quantization_errors = False
 plot_som = False
 random_state = 0
 n_splits = 10
