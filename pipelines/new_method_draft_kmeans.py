@@ -30,7 +30,7 @@ RESULTS_PATH = DATA_PATH+'processed'
 random_state = 0
 # play here
 n_splits = 10
-granularity = 3
+granularity = 7
 keep_rate = 0.65
 
 ## read merged data
@@ -69,19 +69,6 @@ for analysis_label in df['Label'].unique():
     labels, kmeans = KMeans_outlier_detection(X, granularity, random_state)
     index_list.append(df_label.index)
     labels_list.append(labels)
-    if plot_quantization_errors:
-        plt.hist(quantization_errors)
-        plt.axvline(error_treshold, color='k', linestyle='--')
-        plt.xlabel('error')
-        plt.ylabel('frequency')
-        plt.show()
-
-    if plot_som:
-        plt.figure(figsize=(7, 7))
-        # Plotting the response for each pattern in the iris dataset
-        plt.pcolor(som.distance_map().T, cmap='bone_r')  # plotting the distance map as background
-        plt.colorbar()
-        plt.show()
 
 outliers = pd.Series(data=np.concatenate(is_outlier_list), index=np.concatenate(index_list), name='is_outlier')
 quants = pd.Series(data=np.concatenate(quant_errors), index=np.concatenate(index_list), name='quantization_errors')
