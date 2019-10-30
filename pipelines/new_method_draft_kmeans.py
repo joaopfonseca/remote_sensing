@@ -70,18 +70,16 @@ for analysis_label in df['Label'].unique():
     index_list.append(df_label.index)
     labels_list.append(labels)
 
-outliers = pd.Series(data=np.concatenate(is_outlier_list), index=np.concatenate(index_list), name='is_outlier')
-quants = pd.Series(data=np.concatenate(quant_errors), index=np.concatenate(index_list), name='quantization_errors')
 labels_col = pd.Series(data=np.concatenate(labels_list), index=np.concatenate(index_list), name='cluster')
 
 
 ## "candidates" dataset
-df_final = df.join(quants).join(outliers).join(labels_col)
-df_final.to_csv(DATA_PATH+'processed/class_selection.csv')
+df_final = df.join(labels_col)
+#df_final.to_csv(DATA_PATH+'processed/class_selection.csv')
 
 label_encoder = LabelEncoder()
 
-df_no_outliers = df_final#[df_final['is_outlier'] == False]
+df_no_outliers = df_final.copy()#[df_final['is_outlier'] == False]
 X = df_no_outliers[band_cols].values
 y = label_encoder.fit_transform(df_no_outliers['Label'])
 
