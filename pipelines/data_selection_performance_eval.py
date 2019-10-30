@@ -14,8 +14,8 @@ DATA_PATH = 'data/DGT/'
 RESULTS_PATH = DATA_PATH+'processed'
 MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 
-pixel_selection_csv  = ['kmeans+minority_rej+bhattacharyya.csv', 'class_selection.csv']
-pixel_selection_cols = ['consistency_results', 'cluster_status']
+pixel_selection_csv  = ['kmeans+minority_rej+bhattacharyya.csv', 'class_selection.csv', 'class_selection_filter.csv']
+pixel_selection_cols = ['consistency_results', 'cluster_status', 'status']
 
 
 ## read merged data and get train and test ids

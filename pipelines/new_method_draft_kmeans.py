@@ -157,3 +157,6 @@ df_cluster_info['cluster_status'] = df_cluster_info['cumsum']/actual_thresholds<
 #df_cluster_info['cluster_status'] = df_cluster_info['X'].cumsum()<df_cluster_info['X'].sum()*0.7
 
 print(df_cluster_info.groupby(['Label','cluster_status']).agg({'mislabel_rate':np.mean, 'X':np.sum}))
+
+df_results = df_final.join(df_cluster_info['cluster_status'], on=['Label', 'cluster'])
+df_results.to_csv(DATA_PATH+'processed/class_selection_kmeans.csv')
