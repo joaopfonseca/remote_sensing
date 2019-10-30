@@ -2,7 +2,7 @@ import sys
 import os
 PROJ_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(PROJ_PATH)
-print(os.path.realpath(os.path.join(os.path.dirname(__file__), '../')))
+print(PROJ_PATH)
 import pandas as pd
 import numpy as np
 from src.preprocess.data_selection import pixel_selection

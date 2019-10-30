@@ -13,7 +13,7 @@ import sys
 import os
 PROJ_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(PROJ_PATH)
-print(os.path.realpath(os.path.join(os.path.dirname(__file__), '../')))
+print(PROJ_PATH)
 
 from minisom import MiniSom
 from copy import deepcopy
