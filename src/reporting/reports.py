@@ -27,16 +27,18 @@ def make_confusion_matrix(y_true, y_pred, target_names):
     oa      = sum(tp)/total
     fscore  = 2*((np.mean(ua)*np.mean(pa))/(np.mean(ua)+np.mean(pa)))
     gmean   = np.sqrt(np.mean(pa)*np.mean(spec))
-    core_cm = pd.DataFrame(index=labels, columns=labels, data=cm)\
+    core_cm = pd.DataFrame(index=names, columns=names, data=cm)\
                 .append([
-                    pd.Series(data=total_h, index=labels, name='Total').astype(int),
-                    pd.Series(data=pa, index=labels, name='PA')
+                    pd.Series(data=total_h, index=names, name='Total').astype(int),
+                    pd.Series(data=pa, index=names, name='PA')
                     ])
     core_cm['Total'] = np.append(total_v, [total, np.nan])
-    core_cm['Total'] = core_cm['Total'].astype(str).replace('nan', '')
+    core_cm['Total'] = core_cm['Total'].map('{:,.0f}'.format).replace('nan', '')
+    core_cm.loc['Total', names] = core_cm.loc['Total', names].astype(int).map('{:,.0f}'.format)
     core_cm['UA']    = np.append(ua, [np.nan,np.nan])
     core_cm['UA']    = core_cm['UA'].map('{:,.3f}'.format).replace('nan', '')
-    core_cm.loc[labels, labels] = core_cm.loc[labels, labels].applymap('{:,.0f}'.format)
+    core_cm.loc['PA', names] = core_cm.loc['PA', names].astype(float).map('{:,.3f}'.format)
+    core_cm.loc[names, names] = core_cm.loc[names, names].applymap('{:,.0f}'.format)
     scores = pd.DataFrame(data= [oa, fscore, gmean], index=['ACCURACY', 'F-SCORE MACRO', 'G-MEAN MACRO'], columns=['Score'])
     return core_cm, scores
 
@@ -46,6 +48,6 @@ def reports(y_true, y_pred, target_names):
     y_pred = y_pred.astype(int)
     labels = {k:target_names[k] for k in np.unique(y_true)}
 
-    clf_report = pd.DataFrame(classification_report(y_true, y_pred, target_names=labels, output_dict=True)).T
+    clf_report = pd.DataFrame(classification_report(y_true, y_pred, target_names=labels.values(), output_dict=True)).T
     conf_matrix, scores = make_confusion_matrix(y_true, y_pred, target_names=labels)
     return clf_report, conf_matrix, scores

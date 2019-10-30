@@ -73,20 +73,26 @@ class pixel_selection:
                     .drop(columns=[self._polygon_id, self._previous_polygon_id, self._previous_cluster_col])\
                     .values
                 clusters_per_label = list(polygon.index)
+                pre_indices = []
+                pre_labels  = []
                 for clust in clusters_per_label:
                     b = self._df[self._df[self._previous_cluster_col]==clust]\
                         .drop(columns=[self._polygon_id, self._previous_polygon_id, self._previous_cluster_col])\
                         .values
                     distance = Bhattacharyya(a, b)
-                    indices.append([clust])
-                    labels.append([distance])
-            indices_labels = np.array([indices,labels]).squeeze().T
-            indices_labels = indices_labels[indices_labels[:,1].astype(float).argsort()]
-            percentile_65 = int(indices_labels.shape[0]*.65)
-            indices_labels[:percentile_65,1] = True
-            indices_labels[percentile_65:,1] = False
-            indices = np.expand_dims(indices_labels[:,0], 1).astype(str).tolist()
-            labels  = np.expand_dims(indices_labels[:,1], 1).tolist()
+                    pre_indices.append([clust])
+                    pre_labels.append([distance])
+                indices_labels = np.array([pre_indices,pre_labels]).squeeze().T
+                indices_labels = indices_labels[indices_labels[:,1].astype(float).argsort()]
+                percentile_65 = int(indices_labels.shape[0]*.65)
+                indices_labels[:percentile_65,1] = True
+                indices_labels[percentile_65:,1] = False
+                labels.append(indices_labels[:,1])
+                indices.append(indices_labels[:,0].astype(str))
+            self.labels = labels
+            self.indices = indices
+            #indices = np.expand_dims(indices_labels[:,0], 1).astype(str).tolist()
+            #labels  = np.expand_dims(indices_labels[:,1], 1).tolist()
 
         elif method in ['kmeans', 'hierarchical']:
             labels = []
