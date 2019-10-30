@@ -19,8 +19,8 @@ DATA_PATH = PROJ_PATH+'/data/DGT/'
 RESULTS_PATH = DATA_PATH+'processed'
 MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 
-pixel_selection_csv  = ['kmeans+minority_rej+bhattacharyya.csv', 'class_selection.csv', 'class_selection_filter.csv']
-pixel_selection_cols = ['consistency_results', 'cluster_status', 'status']
+pixel_selection_csv  = os.listdir(RESULTS_PATH)
+pixel_selection_col  = 'status'
 
 
 ## read merged data and get train and test ids
@@ -45,7 +45,7 @@ target_names = {k:v for k, v in enumerate(label_encoder.classes_)}
 
 ## train methods
 models = {}
-for file, pixel_selection_col in zip(pixel_selection_csv, pixel_selection_cols):
+for file in pixel_selection_csv:
     print(f'Starting experiment {file.split(".")[0]}...')
     df = pd.read_csv(os.path.join(RESULTS_PATH, file)).sort_values(['X', 'Y'])
     df = df.iloc[train_id].loc[df[pixel_selection_col].astype(float)==1.0]
