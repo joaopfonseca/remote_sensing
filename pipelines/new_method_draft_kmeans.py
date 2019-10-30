@@ -27,8 +27,8 @@ DATA_PATH = PROJ_PATH+'/data/DGT/'
 RAW_CSV_PATH = DATA_PATH+'raw/'
 MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 RESULTS_PATH = DATA_PATH+'processed'
-
 random_state = 0
+# play here
 n_splits = 10
 granularity = 3
 keep_rate = 0.65
