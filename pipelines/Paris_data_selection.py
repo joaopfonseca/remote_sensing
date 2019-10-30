@@ -1,11 +1,15 @@
+import sys
 import os
+PROJ_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(PROJ_PATH)
+print(os.path.realpath(os.path.join(os.path.dirname(__file__), '../')))
 import pandas as pd
 import numpy as np
 from src.preprocess.data_selection import pixel_selection
 from src.reporting.visualize import plot_image
 
 ## configs
-DATA_PATH = 'data/DGT/'
+DATA_PATH = PROJ_PATH+'/data/DGT/'
 RAW_CSV_PATH = DATA_PATH+'raw/'
 MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 RESULTS_PATH = DATA_PATH+'processed/data_selection_results.csv'

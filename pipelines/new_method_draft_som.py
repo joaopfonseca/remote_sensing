@@ -9,6 +9,11 @@ where N is the number of samples in the dataset to analyze.
 E.g. if your dataset has 150 samples, 5*sqrt(150) = 61.23
 hence a map 8-by-8 should perform well.
 """
+import sys
+import os
+PROJ_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(PROJ_PATH)
+print(os.path.realpath(os.path.join(os.path.dirname(__file__), '../')))
 
 from minisom import MiniSom
 from copy import deepcopy
@@ -29,7 +34,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedKFold
 
 ## configs
-DATA_PATH = 'data/DGT/'
+DATA_PATH = PROJ_PATH+'/data/DGT/'
 RAW_CSV_PATH = DATA_PATH+'raw/'
 MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 RESULTS_PATH = DATA_PATH+'processed'
@@ -176,19 +181,20 @@ df_cluster_info = df_cluster_info_A.join(df_cluster_info_B).join(df_cluster_info
 
 thresholds = df_cluster_info.groupby('Label').max()['cumsum']*keep_rate
 actual_thresholds = df_cluster_info[df_cluster_info['cumsum']/thresholds>=1]['cumsum'].groupby('Label').min()
-df_cluster_info['cluster_status'] = df_cluster_info['cumsum']/actual_thresholds<=1
+df_cluster_info['status'] = df_cluster_info['cumsum']/actual_thresholds<=1
 
 #df_cluster_info['cluster_status'] = df_cluster_info['X'].cumsum()<df_cluster_info['X'].sum()*0.7
 
-print(df_cluster_info.groupby(['Label','cluster_status']).agg({'mislabel_rate':np.mean, 'X':np.sum}))
+print(df_cluster_info.groupby(['Label','status']).agg({'mislabel_rate':np.mean, 'X':np.sum}))
 
-df_results = df_final.join(df_cluster_info['cluster_status'], on=['Label', 'cluster'])
+df_results = df_final.join(df_cluster_info['status'], on=['Label', 'cluster'])
 df_results.to_csv(DATA_PATH+f'processed/ps_som_gran_{granularity}_n_filter_clf_{len(filters)*n_splits}_keep_rate_{keep_rate}.csv')
 
 
 ################################################################################
 # plotting examples to check results
 ################################################################################
+"""
 import matplotlib.pyplot as plt
 from src.reporting.visualize import plot_image
 
@@ -216,3 +222,4 @@ _rejected = (obj.pivot('X', 'Y', 'cluster_status').values != 1).astype(float)
 rejected = img*np.array([_rejected for i in range(3)]).swapaxes(0, 1).swapaxes(1, 2).swapaxes(0, 1)
 
 plot_image([np.flip(img, 0), np.flip(rejected, 0), np.flip(accepted, 0)], num_rows=1, figsize=(40, 20), dpi=20)
+"""

@@ -1,3 +1,8 @@
+import sys
+import os
+PROJ_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(PROJ_PATH)
+print(os.path.realpath(os.path.join(os.path.dirname(__file__), '../')))
 from copy import deepcopy
 import pandas as pd
 import numpy as np
@@ -16,8 +21,9 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedKFold
 
+
 ## configs
-DATA_PATH = 'data/DGT/'
+DATA_PATH = PROJ_PATH+'/data/DGT/'
 RAW_CSV_PATH = DATA_PATH+'raw/'
 MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 RESULTS_PATH = DATA_PATH+'processed'

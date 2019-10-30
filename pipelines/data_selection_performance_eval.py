@@ -1,4 +1,9 @@
+import sys
 import os
+PROJ_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(PROJ_PATH)
+print(os.path.realpath(os.path.join(os.path.dirname(__file__), '../')))
+
 import pandas as pd
 import numpy as np
 
@@ -10,7 +15,7 @@ from src.reporting.reports import reports
 
 ## configs
 random_state = 0
-DATA_PATH = 'data/DGT/'
+DATA_PATH = PROJ_PATH+'/data/DGT/'
 RESULTS_PATH = DATA_PATH+'processed'
 MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 
