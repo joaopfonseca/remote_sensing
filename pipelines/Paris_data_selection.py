@@ -10,12 +10,6 @@ RAW_CSV_PATH = DATA_PATH+'raw/'
 MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 RESULTS_PATH = DATA_PATH+'processed/data_selection_results.csv'
 
-## merge all csv's together and write to disk
-dfs = []
-for file in os.listdir(RAW_CSV_PATH):
-    dfs.append(pd.read_csv(RAW_CSV_PATH+file))
-pd.concat(dfs).drop(columns=['Unnamed: 0']).to_csv(MERGED_CSV, index=False)
-
 ## read merged data
 df = pd.read_csv(MERGED_CSV)
 
@@ -26,7 +20,6 @@ df = df[labels_coords_cols+band_cols]
 
 ## drop rows with missing values
 df = df.dropna()
-
 
 ## Paris implementation
 ps = pixel_selection(df[['Object', 'Label']+band_cols], polygon_id_col='Object', class_col='Label')

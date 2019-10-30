@@ -1,15 +1,3 @@
-################################################################################
-# Mega SOM test
-################################################################################
-"""
-A rule of thumb to set the size of the grid for a dimensionality
-reduction task is that it should contain 5*sqrt(N) neurons
-where N is the number of samples in the dataset to analyze.
-
-E.g. if your dataset has 150 samples, 5*sqrt(150) = 61.23
-hence a map 8-by-8 should perform well.
-"""
-
 from copy import deepcopy
 import pandas as pd
 import numpy as np
@@ -34,11 +22,10 @@ RAW_CSV_PATH = DATA_PATH+'raw/'
 MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 RESULTS_PATH = DATA_PATH+'processed'
 
-plot_quantization_errors = True
-plot_som = False
 random_state = 0
 n_splits = 10
 granularity = 3
+keep_rate = 0.65
 
 ## read merged data
 df = pd.read_csv(MERGED_CSV)
@@ -139,10 +126,6 @@ mislabel_rate = (total_filters - np.apply_along_axis(lambda x: x==y, 0, pd.DataF
 #df_after_filter = pd.concat([df_no_outliers, pd.DataFrame(filter_outputs, index=df_no_outliers.index)], axis=1)
 df_no_outliers['mislabel_rate'] = mislabel_rate
 
-
-
-
-
 df_cluster_info_grouped = df_no_outliers.groupby(['Label', 'cluster'])\
             .agg({'mislabel_rate':np.mean, 'X':'count'})\
             .sort_values(['mislabel_rate'])
@@ -150,7 +133,7 @@ df_cluster_info_A = df_cluster_info_grouped.groupby(['Label']).cumsum().rename(c
 df_cluster_info_B = df_cluster_info_grouped.groupby(['Label', 'cluster']).agg({'mislabel_rate':np.mean})
 df_cluster_info = df_cluster_info_A.join(df_cluster_info_B).join(df_cluster_info_grouped['X'])
 
-thresholds = df_cluster_info.groupby('Label').max()['cumsum']*0.50
+thresholds = df_cluster_info.groupby('Label').max()['cumsum']*keep_rate
 actual_thresholds = df_cluster_info[df_cluster_info['cumsum']/thresholds>=1]['cumsum'].groupby('Label').min()
 df_cluster_info['cluster_status'] = df_cluster_info['cumsum']/actual_thresholds<=1
 
@@ -159,4 +142,4 @@ df_cluster_info['cluster_status'] = df_cluster_info['cumsum']/actual_thresholds<
 print(df_cluster_info.groupby(['Label','cluster_status']).agg({'mislabel_rate':np.mean, 'X':np.sum}))
 
 df_results = df_final.join(df_cluster_info['cluster_status'], on=['Label', 'cluster'])
-df_results.to_csv(DATA_PATH+'processed/class_selection_kmeans.csv')
+df_results.to_csv(DATA_PATH+f'processed/ps_kmeans_gran_{granularity}_n_filter_clf_{len(filters)*n_splits}_keep_rate_{keep_rate}.csv')

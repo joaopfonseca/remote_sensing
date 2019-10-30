@@ -21,11 +21,8 @@ RAW_CSV_PATH = DATA_PATH+'raw/'
 MERGED_CSV = DATA_PATH+'interim/all_outputs.csv'
 RESULTS_PATH = DATA_PATH+'processed'
 
-plot_quantization_errors = True
-plot_som = False
 random_state = 0
 n_splits = 10
-granularity = 5
 
 ## read merged data
 df = pd.read_csv(MERGED_CSV)
