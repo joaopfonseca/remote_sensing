@@ -83,8 +83,8 @@ df_selection.to_csv(DATA_PATH+'processed/som+minority_rej+bhattacharyya.csv') # 
 ps = pixel_selection(df[['Object', 'Label']+band_cols], polygon_id_col='Object', class_col='Label')
 ps.get_clusters(method='kmeans', cluster_col='clusters', identify_dominant_cluster=True, random_state=0)
 ps.df = ps.df[ps.df['clusters'].apply(lambda x: x.split('_')[-1])=='True']
-df_selection, clusters = ps.get_consistency_analysis(method='bhattacharyya', consistency_col='consistency_results', random_state=0)
-df_selection = df.join(df_selection['consistency_results'])
+df_selection, clusters = ps.get_consistency_analysis(method='bhattacharyya', consistency_col='status', random_state=0)
+df_selection = df.join(df_selection['status'])
 df_selection.to_csv(DATA_PATH+'processed/kmeans+minority_rej+bhattacharyya.csv') # save results
 
 
