@@ -54,7 +54,7 @@ def KMeans_outlier_detection(X, granularity=5, random_state=None):
 
     k = int(granularity*np.sqrt(X.shape[0]))
 
-    kmeans = MiniBatchKMeans(k, random_state=random_state, verbose=1)
+    kmeans = MiniBatchKMeans(k, init_size=3*k, random_state=random_state, verbose=1)
     labels = kmeans.fit_predict(X).astype(str)
     return labels, kmeans
 
