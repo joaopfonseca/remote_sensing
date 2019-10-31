@@ -44,8 +44,8 @@ random_state = 0
 # play here
 som_outlier_detection = False
 n_splits = 10
-granularity = 5
-keep_rate = 0.65
+granularity = 6
+keep_rate = 0.5
 
 ## read merged data
 df = pd.read_csv(MERGED_CSV)

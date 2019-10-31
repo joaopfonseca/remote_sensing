@@ -7,7 +7,7 @@ from copy import deepcopy
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
+from sklearn.cluster import MiniBatchKMeans
 
 # filter classifiers
 from sklearn.ensemble import (
@@ -54,7 +54,7 @@ def KMeans_outlier_detection(X, granularity=5, random_state=None):
 
     k = int(granularity*np.sqrt(X.shape[0]))
 
-    kmeans = KMeans(k, random_state=random_state)
+    kmeans = MiniBatchKMeans(k, random_state=random_state)
     labels = kmeans.fit_predict(X).astype(str)
     return labels, kmeans
 
