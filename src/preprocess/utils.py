@@ -72,15 +72,18 @@ def createImageCubes(X, y, window_size=5, removeNoLabels=True, NoLabelVal=-1):
 
 
 def applyPCA(X, numComponents=10, model=None):
-    newX = np.reshape(X, (-1, X.shape[2]))
+    shp = X.shape
+    newX = np.reshape(X, (-1, shp[2]))
+    del X
     if model:
         pca = model
         newX = pca.transform(newX)
     else:
-        pca = PCA(n_components=numComponents, whiten=True)
+        pca = PCA(n_components=numComponents, copy=False, whiten=True)
         newX = pca.fit_transform(newX)
-    newX = np.reshape(newX, (X.shape[0],X.shape[1], numComponents))
+    newX = np.reshape(newX, (shp[0],shp[1], numComponents))
     return newX, pca
+
 
 def split_data(X, y, test_size=0.7, random_state=0, stratify=None, **kwargs):
     X_train, X_test, y_train, y_test = train_test_split(

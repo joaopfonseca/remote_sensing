@@ -1,10 +1,12 @@
 
 """
 TODO:
+    - There's a bug in the plot function
     - add custom indices
     - Assertions
     - Method for x and y min and max
     - documentation
+    - Sort bands
 """
 
 import os
@@ -57,7 +59,7 @@ class SentinelProductReader:
             for band in self.bands:
                 band_path = os.path.join(bands_path, b_prefix+band+'.jp2')
                 self.add_band(band_path)
-            self.get_X_array()
+            #self.get_X_array()
 
         if labels_shapefile and label_col:
             self.add_labels(labels_shapefile, label_col)
@@ -118,7 +120,7 @@ class SentinelProductReader:
         y_labels_inv = {v: k for k, v in self.y_labels.items()}
         gdf[label_col] = gdf[label_col].map(y_labels_inv)
         self.y = gdf
-        self.get_y_array()
+        #self.get_y_array()
         return self
 
     def add_band(self, band_path):
@@ -175,12 +177,14 @@ class SentinelProductReader:
         # assertion:
         # check if X_array exists, else run get_X_array
         # check if y_array exists, else don't add label column
-        columns = ['x', 'y']+self.bands+[self.label_col]
+        columns = ['y', 'x']+self.X_labels+[self.label_col]
         shp  = self.X_array.shape
-        coords = get_2Dcoordinates_matrix(shp).swapaxes(0,1).reshape(2, shp[0]*shp[1])
-        X_reshaped = self.X_array.T.reshape((shp[2], shp[0]*shp[1]))
-        y_reshaped = self.y_array.reshape((1, shp[0]*shp[1]))
-        data = np.concatenate([coords, X_reshaped, y_reshaped])
+        coords = np.indices(shp[:-1])
+        data = np.concatenate([
+            coords,
+            np.moveaxis(self.X_array,-1,0),
+            np.expand_dims(self.y_array,0)]
+        ).reshape((len(columns), shp[0]*shp[1]))
         return pd.DataFrame(data=data.T, columns=columns)
 
     def add_indices(self, indices=['NDVI', 'NDBI', 'NDMI', 'NDWI']):
