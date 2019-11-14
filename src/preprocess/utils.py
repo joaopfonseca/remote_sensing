@@ -15,6 +15,7 @@ def ZScoreNormalization(X, axes=(0,1), scorer=None):
     X_norm = scorer(X)
     return X_norm, scorer
 
+
 def get_2Dcoordinates_matrix(shape, window_size=None):
     """
     pass window size value only if X is padded. If so, excludes coordinates in the padded region

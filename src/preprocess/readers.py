@@ -6,7 +6,7 @@ TODO:
     - Assertions
     - Method for x and y min and max
     - documentation
-    - Sort bands
+    - Sort bands (!!!)
 """
 
 import os
@@ -20,51 +20,13 @@ import pandas as pd
 import geopandas as gpd
 from .utils import get_2Dcoordinates_matrix
 
-class SentinelProductReader:
+
+class ProductReader:
     """
-    Reads Sentinel 2 product and converts it into a matrix with band values.
+    Base class for all product readers. Should not be used on its own.
     """
-
-    def __init__(self, bands_path=None, bands=None, labels_shapefile=None, label_col=None):
-
-        # # assertions:
-        # bands_path must be None or point to a directory with .jp2 files having
-        # names recognized as sentinel 2 images
-        # Also check if bands_path exists
-        # #
-        # bands must be either None or type list
-        # #
-        # labels_shapefile: only .shp or .shx file types are supported
-
-        self.bands_path = os.path.abspath(bands_path) if bands_path else None
-        self.meta       = []
-        self.X          = []
-        self.X_labels   = []
-
-        if bands_path and type(bands)==list:
-            self.bands = bands
-        elif bands_path and not bands:
-            self.bands = [self._get_band_name(x) for x in os.listdir(bands_path)]
-
-        if bands_path:
-            _b_prefix = [
-                x.replace(x.split('_')[-1],'')
-                for x in os.listdir(bands_path) if x.endswith('.jp2')
-            ]
-
-            # assertion:
-            # check if self.b_prefix length >= than bands length
-
-            b_prefix = _b_prefix[0]
-            for band in self.bands:
-                band_path = os.path.join(bands_path, b_prefix+band+'.jp2')
-                self.add_band(band_path)
-            #self.get_X_array()
-
-        if labels_shapefile and label_col:
-            self.add_labels(labels_shapefile, label_col)
-        elif labels_shapefile and not label_col:
-            raise TypeError('missing required argument \'label_col\'')
+    def __init__(self):
+        pass
 
     def plot(self, bands=['B04', 'B03', 'B02'], show_legend=True, show_y=True, alpha=1, cmap='Pastel1', figsize=(20, 20), dpi=80, *args):
         # assertion:
@@ -107,33 +69,6 @@ class SentinelProductReader:
                 fontsize='large'
             )
 
-    def add_labels(self, labels_shapefile, label_col):
-        # assertion:
-        # check in self.meta is not empty
-        self.label_col = label_col
-        gdf = gpd.read_file(labels_shapefile)\
-            .to_crs(dict(self.meta[0]['crs']))\
-            [[label_col, 'geometry']]
-
-        self.y_labels = dict(pd.Series(gdf[label_col].unique()))
-
-        y_labels_inv = {v: k for k, v in self.y_labels.items()}
-        gdf[label_col] = gdf[label_col].map(y_labels_inv)
-        self.y = gdf
-        #self.get_y_array()
-        return self
-
-    def add_band(self, band_path):
-        band_name = self._get_band_name(band_path)
-        if band_name not in self.X_labels:
-            band = rasterio.open(band_path, driver='JP2OpenJPEG')
-            self.X.append(band.read(1))
-            self.X_labels.append(band_name)
-            self.meta.append(band.meta)
-        else:
-            raise ValueError(f'Band \'{band_name}\' already in X at index {self.X_labels.index(band_name)}.')
-        return self
-
     def get_X_array(self, high_resolution=True):
         hw = np.array([arr.shape for arr in self.X])
         idx = hw.argmax(axis=0)[0]
@@ -168,6 +103,22 @@ class SentinelProductReader:
         )
         self.y_array = burned
         return self.y_array
+
+    def add_labels(self, labels_shapefile, label_col):
+        # assertion:
+        # check in self.meta is not empty
+        self.label_col = label_col
+        gdf = gpd.read_file(labels_shapefile)\
+            .to_crs(dict(self.meta[0]['crs']))\
+            [[label_col, 'geometry']]
+
+        self.y_labels = dict(pd.Series(gdf[label_col].unique()))
+
+        y_labels_inv = {v: k for k, v in self.y_labels.items()}
+        gdf[label_col] = gdf[label_col].map(y_labels_inv)
+        self.y = gdf
+        #self.get_y_array()
+        return self
 
     def _get_band_name(self, band_path):
         return band_path.split('_')[-1].split('.')[0]
@@ -247,3 +198,99 @@ class SentinelProductReader:
         pickle.dump(self, open(fname, 'wb'))
         self.get_X_array()
         self.get_y_array()
+
+
+class SentinelProductReader(ProductReader):
+    """
+    Reads Sentinel 2 product (jpeg2000 format) and converts it to a matrix with band values.
+    """
+    def __init__(self, bands_path=None, bands=None, labels_shapefile=None, label_col=None):
+
+        # # assertions:
+        # bands_path must be None or point to a directory with .jp2 files having
+        # names recognized as sentinel 2 images
+        # Also check if bands_path exists
+        # #
+        # bands must be either None or type list
+        # #
+        # labels_shapefile: only .shp or .shx file types are supported
+
+        self.bands_path = os.path.abspath(bands_path) if bands_path else None
+        self.meta       = []
+        self.X          = []
+        self.X_labels   = []
+
+        if bands_path and type(bands)==list:
+            self.bands = bands
+        elif bands_path and not bands:
+            self.bands = [self._get_band_name(x) for x in os.listdir(bands_path)]
+
+        if bands_path:
+            _b_prefix = [
+                x.replace(x.split('_')[-1],'')
+                for x in os.listdir(bands_path) if x.endswith('.jp2')
+            ]
+
+            # assertion:
+            # check if self.b_prefix length >= than bands length
+
+            b_prefix = _b_prefix[0]
+            for band in self.bands:
+                band_path = os.path.join(bands_path, b_prefix+band+'.jp2')
+                self.add_band(band_path)
+            #self.get_X_array()
+
+        if labels_shapefile and label_col:
+            self.add_labels(labels_shapefile, label_col)
+        elif labels_shapefile and not label_col:
+            raise TypeError('missing required argument \'label_col\'')
+
+    def add_band(self, band_path):
+        band_name = self._get_band_name(band_path)
+        if band_name not in self.X_labels:
+            band = rasterio.open(band_path, driver='JP2OpenJPEG')
+            self.X.append(band.read(1))
+            self.X_labels.append(band_name)
+            self.meta.append(band.meta)
+        else:
+            raise ValueError(f'Band \'{band_name}\' already in X at index {self.X_labels.index(band_name)}.')
+        return self
+
+
+class TIFFProductReader(ProductReader):
+    """
+    Reads a .tiff product and converts it to a matrix with band values.
+    """
+    def __init__(self, TIFF_path, band_names=None, labels_shapefile=None, label_col=None):
+        self.bands_path = os.path.abspath(bands_path) if bands_path else None
+        self.meta       = []
+        self.X          = []
+        self.X_labels   = []
+
+        if type(band_names)==list:
+            self.bands = band_names
+            self.read_tiff(TIFF_path, band_names=self.bands)
+        else:
+            self.bands = [self._get_band_name(x) for x in os.listdir(bands_path)]
+
+
+
+        if labels_shapefile and label_col:
+            self.add_labels(labels_shapefile, label_col)
+        elif labels_shapefile and not label_col:
+            raise TypeError('missing required argument \'label_col\'')
+
+    def read_tiff(self, filepath, band_names=None):
+        if band_name not in self.X_labels:
+            raster = rasterio.open(filepath)
+            self.X = np.moveaxis(raster.read(), 0, -1)
+            if band_names:
+                # assert whether len(band_names)==self.X.shape[-1]
+                self.X_labels.append(band_names)
+            else:
+                self.X_labels.append([f'band_{i}' for i in range(self.X.shape[-1])])
+
+            self.meta.append(raster.meta)
+        else:
+            raise ValueError(f'Band \'{band_name}\' already in X at index {self.X_labels.index(band_name)}.')
+        return self
