@@ -197,4 +197,5 @@ df.to_csv(PROCESSED_PATH+'classification_results.csv')
 
 
 
-reports(df[df['train_set']]['Megaclasse'], df[df['train_set']]['y_pred'], labels)[-1]
+reports(df[~df['train_set']].dropna()['Megaclasse'], df[~df['train_set']].dropna()['y_pred'], {i:i for i in df['Megaclasse'].unique()})[-1]
+plt.imshow(df[~df['train_set']].pivot('y','x','y_pred'))
