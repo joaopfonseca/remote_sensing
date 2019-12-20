@@ -109,8 +109,6 @@ norm_pca_cols = ['comp_'+str(x) for x in range(10)]
 df_norm_pca = pd.DataFrame(norm_pca_vals, columns=norm_pca_cols)
 df = df.drop(columns=bands_list).join([df[bands_list], df_norm_pca])
 
-# TODO: PICKLE zscorers and PCA!
-
 ## divide data from dataframe into train and testing
 margin = int((width_height/2))
 
