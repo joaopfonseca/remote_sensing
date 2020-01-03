@@ -10,6 +10,7 @@ TODO:
 """
 
 import os
+import itertools
 import pickle
 import numpy as np
 import rasterio
@@ -262,7 +263,10 @@ class TIFFProductReader(ProductReader):
     Reads a .tiff product and converts it to a matrix with band values.
     """
     def __init__(self, TIFF_path, band_names=None, labels_shapefile=None, label_col=None):
-        self.bands_path = os.path.abspath(bands_path) if bands_path else None
+        # TODO: check if len band names is the same as the number of bands
+        # check condition missing required argument \'label_col\''
+
+        self.TIFF_path = os.path.abspath(TIFF_path) if TIFF_path else None
         self.meta       = []
         self.X          = []
         self.X_labels   = []
@@ -271,7 +275,17 @@ class TIFFProductReader(ProductReader):
             self.bands = band_names
             self.read_tiff(TIFF_path, band_names=self.bands)
         else:
-            self.bands = [self._get_band_name(x) for x in os.listdir(bands_path)]
+            self.tiff_files = [i for i in os.listdir(TIFF_path) if i.endswith('.tif')]
+            num_bands = [self._get_num_bands(os.path.join(TIFF_path, x)) for x in self.tiff_files]
+            self.bands = [
+                f'{i.replace(".tif","")}_{n}'
+                for i,n
+                in zip(
+                    np.repeat(self.tiff_files, num_bands),
+                    list(itertools.chain(*[list(range(m)) for m in num_bands]))
+                    )
+                ]
+            self.read_tiff(self.TIFF_path, band_names=self.bands)
 
 
 
@@ -281,16 +295,26 @@ class TIFFProductReader(ProductReader):
             raise TypeError('missing required argument \'label_col\'')
 
     def read_tiff(self, filepath, band_names=None):
-        if band_name not in self.X_labels:
-            raster = rasterio.open(filepath)
-            self.X = np.moveaxis(raster.read(), 0, -1)
-            if band_names:
-                # assert whether len(band_names)==self.X.shape[-1]
-                self.X_labels.append(band_names)
-            else:
-                self.X_labels.append([f'band_{i}' for i in range(self.X.shape[-1])])
-
+        for file in self.tiff_files:
+            raster = rasterio.open(os.path.join(filepath, file))
+            self.X.append(np.moveaxis(raster.read(), 0, -1))
             self.meta.append(raster.meta)
-        else:
-            raise ValueError(f'Band \'{band_name}\' already in X at index {self.X_labels.index(band_name)}.')
+            self.X_labels.extend(band_names)
         return self
+
+    def get_X_array(self, high_resolution=True):
+        hw = np.array([arr.shape for arr in self.X])
+        idx = hw.argmax(axis=0)[0]
+        self.height, self.width, _ = hw[idx]
+        X_final = []
+        for arr in self.X:
+            w, h, _ = arr.shape
+            X_resoluted = np.repeat(arr, repeats=self.height/h, axis=0)
+            X_resoluted = np.repeat(X_resoluted, repeats=self.width/w, axis=1)
+            X_final.append(X_resoluted)
+        self.X_array = np.moveaxis(np.array(X_final), 0, -1)
+        return self.X_array
+
+
+    def _get_num_bands(self, tiff_path):
+        return rasterio.open(tiff_path).count
