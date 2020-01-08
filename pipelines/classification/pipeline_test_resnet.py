@@ -26,7 +26,7 @@ from src.reporting.reports import reports # make this structure more proper
 from src.preprocess.data_selection import KMeans_filtering
 from src.reporting.visualize import plot_image
 
-from src.model.resnet import ResNet50
+from src.models.resnet import ResNet50
 
 ################################################################################
 # CONFIGS
@@ -40,7 +40,7 @@ INTERIM_PATH = PROJ_PATH+'/data/sentinel_coimbra/interim/'
 PROCESSED_PATH = DATA_PATH+'../processed/'
 CSV_PATH = PROCESSED_PATH+'picture_data.csv'
 ## preprocessing configs
-read_csv     = False        # Read saved csv with band values
+read_csv     = True        # Read saved csv with band values
 random_state = 0            # Random state for everything. Generally left unchanged.
 debuffer_cos = True         # Removes labels of pixels close to the border of each polygon
 K            = 10           # Number of components for PCA
@@ -119,7 +119,7 @@ df['train_set'] = df.apply(lambda row: (
 
 
 ################################################################################
-# Hybrid Spectral Net
+# ResNet
 ################################################################################
 def pivot_multispectral(df, xy_cols, bands):
     rgb = []
@@ -131,6 +131,7 @@ def pivot_multispectral(df, xy_cols, bands):
 ## model setup
 print('Setting model...')
 ResNet = ResNet50(input_shape=(window_size, window_size, K), output_units=output_units)
+# ResNet.load_weights('models/resnet.hdf5')
 
 coords = df[['y','x']]
 criteria = (coords>coords.min()+int(window_size/2)+1).all(axis=1) & (coords<coords.max()-int(window_size/2)).all(axis=1)

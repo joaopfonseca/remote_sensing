@@ -90,7 +90,7 @@ class ProductReader:
         idx = hw.argmax(axis=0)[0]
 
         _meta = self.meta[idx]
-        out_shape = tuple(hw[idx])
+        out_shape = tuple(hw[idx][:2])
         transf = _meta['transform']
 
         burned = features.rasterize(
@@ -111,6 +111,7 @@ class ProductReader:
         self.label_col = label_col
         gdf = gpd.read_file(labels_shapefile)\
             .to_crs(dict(self.meta[0]['crs']))\
+            .dropna()\
             [[label_col, 'geometry']]
 
         self.y_labels = dict(pd.Series(gdf[label_col].unique()))

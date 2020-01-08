@@ -43,11 +43,12 @@ def make_confusion_matrix(y_true, y_pred, target_names):
     return core_cm, scores
 
 
-def reports(y_true, y_pred, target_names):
+def reports(y_true, y_pred, target_names=None):
     y_true = y_true.astype(int)
     y_pred = y_pred.astype(int)
-    labels = {k:target_names[k] for k in np.unique(y_true)}
+    if not target_names:
+        target_names = {k:k for k in np.unique([y_true, y_pred])}
 
-    clf_report = pd.DataFrame(classification_report(y_true, y_pred, target_names=labels.values(), output_dict=True)).T
-    conf_matrix, scores = make_confusion_matrix(y_true, y_pred, target_names=labels)
+    clf_report = pd.DataFrame(classification_report(y_true, y_pred, target_names=target_names.values(), output_dict=True)).T
+    conf_matrix, scores = make_confusion_matrix(y_true, y_pred, target_names=target_names)
     return clf_report, conf_matrix, scores

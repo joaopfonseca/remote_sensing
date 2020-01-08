@@ -14,6 +14,7 @@ from sklearn.decomposition import PCA
 
 ## own libraries
 from src.preprocess.readers import SentinelProductReader
+from src.models.AutoEncoder import MLPAutoEncoder, MLPEncoderClassifier
 from src.preprocess.utils import (
     ZScoreNormalization,
     pad_X,
@@ -35,7 +36,7 @@ INTERIM_PATH = PROJ_PATH+'/data/sentinel_coimbra/interim/'
 PROCESSED_PATH = DATA_PATH+'../processed/'
 CSV_PATH = PROCESSED_PATH+'picture_data.csv'
 ## preprocessing configs
-read_csv     = False        # Read saved csv with band values
+read_csv     = True        # Read saved csv with band values
 random_state = 0            # Random state for everything. Generally left unchanged.
 debuffer_cos = True         # Removes labels of pixels close to the border of each polygon
 K            = 10           # Number of components for PCA
@@ -151,7 +152,7 @@ mses = {}
 for label in np.unique(y_train):
     autoencoder = MLPAutoEncoder(10)
     X_label = X_train[y_train==label]
-    autoencoder.fit(X_label, X_label, batch_size=256, epochs=20)
+    autoencoder.fit(X_label, X_label, batch_size=256, epochs=100)
     print(f'Predicting label {label}...')
     df_test[f'{label}_mse'] = autoencoder.predict(df_test[norm_pca_cols].values)
     autoencoders[label] = autoencoder
@@ -175,7 +176,10 @@ df_test['y_pred1'] = y_pred1
 df_test['y_pred2'] = y_pred2
 
 
-mlp = MLPEncoderClassifier(autoencoders.values(), np.unique(y_train))
+mlp = MLPEncoderClassifier(autoencoders.values(), int(np.unique(y_train).max())+1)
 mlp.fit(X_train, y_train)
 
 df_test['mlp_pred'] = mlp.predict(df_test[norm_pca_cols].values)
+df_test.to_csv(PROCESSED_PATH+'autoencoder_mlp_classifier_results.csv')
+
+reports(df_test['Megaclasse'], df_test['mlp_pred'])
