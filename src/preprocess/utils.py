@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 
 def ZScoreNormalization(X, axes=(0,1), scorer=None):
+    """Applies Z-Score Normalization over a multispectral image"""
     if not scorer:
         u = X.mean(axis=axes)
         std = X.std(axis=axes)
@@ -84,15 +85,3 @@ def applyPCA(X, numComponents=10, model=None):
         newX = pca.fit_transform(newX)
     newX = np.reshape(newX, (shp[0],shp[1], numComponents))
     return newX, pca
-
-
-def split_data(X, y, test_size=0.7, random_state=0, stratify=None, **kwargs):
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=test_size,
-        random_state=random_state,
-        stratify=stratify,
-        *kwargs
-    )
-    return X_train, X_test, y_train, y_test
