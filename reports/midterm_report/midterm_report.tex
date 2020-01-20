@@ -11,6 +11,7 @@
 \setlength{\parindent}{0pt}
 
 \usepackage[top=100pt,bottom=100pt,left=68pt,right=66pt]{geometry}
+\geometry{a4paper}
 
 \raggedbottom
 
@@ -28,7 +29,7 @@
 \titleformat{\chapter}
    {\normalfont\LARGE\bfseries}{\thechapter.}{1em}{}
 % Change distance between chapter header and text
-\titlespacing{\chapter}{0pt}{50pt}{2\baselineskip}
+\titlespacing{\chapter}{0pt}{25pt}{2\baselineskip}
 
 % Adds table captions above the table per default
 \usepackage{float}
@@ -61,16 +62,16 @@
 
 	% Titles
 	{\large \textbf{Midterm Report} \par}
-	\vspace{3cm}
+	\vspace{2.5cm}
 	{\Huge \textbf{IPSTERS}} \\
   \vspace{1cm}
   {\Huge IPSentinel Terrestrial Enhanced Recognition System} \\
-	\vspace{1cm}
+	\vspace{2.5cm}
 	{\large \textbf{João Fonseca} \par}
 	\vspace{.75cm}
 	{\large \textbf{Advisor:} Prof. Fernando Lucas Bação \par}
 
-	\vspace{1.3cm}
+	\vspace{1.5cm}
     \includegraphics[scale=0.2]{ims_logo.png}
   \vspace{1.3cm}
 
@@ -169,10 +170,20 @@ dimensionality \cite{Ghojogh2019}. Dimensionality reduction techniques can be
 further subdivided into 2 parts, feature selection and feature extraction, both
 techniques explored below.
 
-The dataset is
+% ask Arman for help on dataset description later on
+The datasets used in this project are Sentinel 2 image composites overlaid with
+the Portuguese Land cover-land use maps (COS). Due to its 1ha resolution, this
+type of data is prone to noisy labelling. % insert image with mislabeled regions
+Mislabeled points are potentially problematic since the use of these points for
+producing land cover maps at a 10m resolution can either output generalised and/
+or erroneous predictions. Therefore, it is necessary to explore the need of
+noisy data filtering.
+
 
 \section{Feature Selection Methods}
 ashdasf ahsd bjahsdb jahs.
+
+
 
 \section{Feature Extraction Methods}
 adasdasdasdas asdasdasda
