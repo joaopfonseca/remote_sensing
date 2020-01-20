@@ -1,0 +1,218 @@
+\documentclass[12pt, english, openany]{book}
+
+\usepackage[]{graphicx}
+\usepackage[]{color}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+\setlength{\parskip}{\smallskipamount}
+\setlength{\parindent}{0pt}
+
+\usepackage[top=100pt,bottom=100pt,left=68pt,right=66pt]{geometry}
+
+\raggedbottom
+
+\usepackage[english]{babel}
+
+% All page numbers positioned at the bottom of the page
+\usepackage{fancyhdr}
+\fancyhf{} % clear all header and footers
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt} % remove the header rule
+\pagestyle{fancy}
+
+% Changes the style of chapter headings
+\usepackage{titlesec}
+\titleformat{\chapter}
+   {\normalfont\LARGE\bfseries}{\thechapter.}{1em}{}
+% Change distance between chapter header and text
+\titlespacing{\chapter}{0pt}{50pt}{2\baselineskip}
+
+% Adds table captions above the table per default
+\usepackage{float}
+\floatstyle{plaintop}
+\restylefloat{table}
+
+% Adds space between caption and table
+\usepackage[tableposition=top]{caption}
+
+% Adds hyperlinks to references and ToC
+\usepackage{hyperref}
+\hypersetup{hidelinks,linkcolor = blue} % Changes the link color and hides the
+% hideous red border that usually is created
+
+% If multiple images are to be added, a folder (path) with all the images can
+% be added here
+\graphicspath{ {figures/} }
+
+% Separates the first part of the report/thesis in Roman numerals
+\frontmatter
+
+
+\begin{document}
+\selectlanguage{english}
+
+\begin{titlepage}
+	\clearpage\thispagestyle{empty}
+	\centering
+	\vspace{1.2cm}
+
+	% Titles
+	{\large \textbf{Midterm Report} \par}
+	\vspace{3cm}
+	{\Huge \textbf{IPSTERS}} \\
+  \vspace{1cm}
+  {\Huge IPSentinel Terrestrial Enhanced Recognition System} \\
+	\vspace{1cm}
+	{\large \textbf{João Fonseca} \par}
+	\vspace{.75cm}
+	{\large \textbf{Advisor:} Prof. Fernando Lucas Bação \par}
+
+	\vspace{1.3cm}
+    \includegraphics[scale=0.2]{ims_logo.png}
+  \vspace{1.3cm}
+
+	{\normalsize NOVA Information Management School \\
+		Instituto Superior de Estatística e Gestão de Informação \\
+		Universidade Nova de Lisboa \par}
+
+  \vspace{1.5cm}
+
+	% Set the date
+	{\normalsize \textbf \today \par}
+	\pagebreak
+\end{titlepage}
+
+\chapter*{Abstract}
+
+This report documents the work developed towards the research project "IPSTERS
+- IPSentinel Terrestrial Enhanced Recognition System". It focuses on the
+exploration of several machine learning (ML) techniques, covering different
+stages of a Land Use/Land Cover Classification (LULC) pipeline. These
+techniques aim to minimise problems typically found in this kind of data,
+namely data ingestion, feature selection, data filtering and classification.
+
+
+
+\tableofcontents{}
+
+\clearpage
+
+\listoffigures
+
+\clearpage
+
+\listoftables
+
+\mainmatter
+
+\chapter{Introduction}
+
+The Copernicus programme is the European Union (EU) Earth Observation (EO)
+programme, headed by the European Space Agency, and the developer of the
+Sentinels EO satellites. The IPSentinel is the Portuguese infrastructure
+developed by Direção Geral do Território (DGT) and Instituto Português do Mar e
+da Atmosfera (IPMA) for storing and providing images of Sentinel satellites,
+covering the Portuguese territory and its search and rescue area. This free EO
+data has been used to inform environmental models, business strategies and
+political decisions. However, this ever growing volume of data requires big
+data workload that is overwhelming for Public Administration (PA) agencies. As
+a result, the use of IPSentinel data has not been widely adopted by the PA that
+would profit from it.
+
+Often what these agencies need for their goals are digested data in the form of
+specific class maps. These value-added products are often called level-3
+products and are fundamental for land-management and for the country's
+international commitments such as the estimation of CO2 emissions. These
+products are mainly obtained by visual interpretation of high resolution
+satellite imagery, requiring significant allocation of human resources from the
+PA and taking a long time to produce, being one of the reasons for the low
+update rate and low resolution. In the case of COS (Portuguese Land cover-land
+use maps) they are produced every 5 years with 1ha resolution and EU CORINE
+maps at least every 6 years with 25ha.
+
+\section{Purpose and Objectives}
+
+The main goal of this project is to explore the applications and limitations of
+artificial intelligence (AI) algorithms with accelerated processing hardware
+capabilities, as a unit of the IPSentinel for the digestion of large volumes of
+remotely sensed data, to produce level-3 products for land applications with
+the least amount of human intervention. We propose exploring two artificial
+intelligence approaches, one applying active learning techniques and another
+based on fuzzy logic.
+\\
+Data used
+\\
+Code availability here
+\\
+Research grant info
+
+\section{Document Structure}
+
+
+\chapter{Literature Review}
+
+The state of the art on the main challenges identified for the project is shown
+here. The multispectral imagery used in this project is targeted for a large
+area (continental Portugal) and contains complex and highly correlated spectral
+information. Although the presence of multicollinearity doesn't pose a problem
+for the adequacy of modern ML models to predict a target variable
+\cite{Farrell2019}, high dimensional data is difficult to process and therefore
+strains the capacity of producing accurate LULC maps. Dimensionality reduction
+techniques are used to address such an issue. These techniques allow the
+selection of the most important feature within the image composites used,
+allowing for 1) a clearer understanding of the most important features for LULC
+classification, 2) accelerated model training and 3) avert the curse of
+dimensionality \cite{Ghojogh2019}. Dimensionality reduction techniques can be
+further subdivided into 2 parts, feature selection and feature extraction, both
+techniques explored below.
+
+The dataset is
+
+\section{Feature Selection Methods}
+ashdasf ahsd bjahsdb jahs.
+
+\section{Feature Extraction Methods}
+adasdasdasdas asdasdasda
+
+\section{Data Filtering Methods}
+% In order to add an unnumbered section/chapter the following code needs to be
+% used
+%\addcontentsline{toc}{section}{Uppgift 1}
+\subsection*{Cluster-based methods}
+asda asd ashd iuahsd iuahsd i.
+
+\subsection*{Classifier-based methods}
+Mitt data som ni kan se på sida, har jag använt för att göra den snygga figur
+som finns på sida.
+
+
+% Begins a figure float
+\begin{figure}[H]
+    \centering
+    <<echo=FALSE, fig.height = 4, fig.width = 7>>=
+    with(data=iris,plot(Sepal.Length,Sepal.Width,main="Min figur",col="Red", las = 1))
+    @
+    \caption{En figur}
+    \label{fig:En-figur}
+\end{figure}
+
+\section{Classification Methods}
+bla bala asdashd aisu hoaj.
+
+\chapter{Methodology}
+
+\chapter{Results and Discussion}
+
+
+
+% Adding a bibliography if citations are used in the report
+\bibliographystyle{plain}
+\bibliography{references.bib}
+% Adds reference to the Bibliography in the ToC
+\addcontentsline{toc}{chapter}{\bibname}
+
+
+\end{document}
