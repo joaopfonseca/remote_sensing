@@ -1,3 +1,13 @@
+# LaTeX garbage
+*.aux
+*.fdb_latexmk
+*.lot
+*.lof
+*.fls
+*.out
+*.synctex.gz
+*.toc
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
