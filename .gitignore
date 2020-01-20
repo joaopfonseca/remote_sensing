@@ -1,4 +1,7 @@
-# LaTeX garbage
+# Keras models are too large to upload
+*.hdf5
+
+# LaTeX stuff
 *.aux
 *.fdb_latexmk
 *.lot
@@ -9,6 +12,9 @@
 *.toc
 *.blg
 *.bbl
+*.upa
+*.upb
+*.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
