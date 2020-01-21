@@ -60,7 +60,7 @@
 \begin{titlepage}
 	\clearpage\thispagestyle{empty}
 	\centering
-	\vspace{1.2cm}
+	\vspace{.5cm}
 
 	% Titles
 	{\large \textbf{Midterm Report} \par}
@@ -70,8 +70,8 @@
   {\Huge IPSentinel Terrestrial Enhanced Recognition System} \\
 	\vspace{2.5cm}
 	{\large \textbf{João Fonseca} \par}
-	\vspace{.75cm}
-	{\large \textbf{Advisor:} Prof. Fernando Lucas Bação \par}
+	\vspace{.5cm}
+	{\large \textbf{Advisor:} Prof. Fernando Lucas Bação, PhD \par}
 
 	\vspace{1.5cm}
     \includegraphics[scale=0.2]{ims_logo.png}
@@ -174,12 +174,16 @@ dimensionality \cite{Ghojogh2019}.
 
 % ask Arman for help on dataset description later on
 The datasets used in this project are Sentinel 2 image composites overlaid with
-the Portuguese Land cover-land use maps (COS). Due to its 1ha resolution, this
-type of data is prone to noisy labelling. % insert image with mislabeled regions
+the Portuguese Land cover-land use maps (COS). This
+type of data is prone to noisy labelling for various reasons. Label noisy may
+come from discrepancies between the original map's resolution (in the case of
+COS, 1ha) and the objective map's resolution (for this project,
+10m\textsuperscript{2}), as well as land cover type changes or classification
+errors. % insert image with mislabeled regions
 Mislabeled points are potentially problematic since the use of these points for
-producing land cover maps at a 10m resolution can output generalised and/ or
-erroneous predictions. Therefore, it is necessary to explore the need for noisy
-data filtering.
+producing land cover maps at a 10m\textsuperscript{2} resolution can output
+generalised and/or erroneous predictions. Therefore, it is necessary to
+explore the need for noisy data filtering.
 
 Finally, classification algorithms are discussed in the last section. These
 algorithms should be resistant to noise and/or have correcting measures to
@@ -281,15 +285,66 @@ significant limitations).
 %\addcontentsline{toc}{section}{Uppgift 1}
 \subsection*{Cluster-based methods}
 
-The best performing label noise detection algorithm based on clustering methods was proposed by \cite{Paris2019}. This method assumes the availability of a LULC map provided at a polygon level. The training set identification method is based on 3 steps: 1) Polygon k-means clustering, 2) Polygon consistency analysis and 3) Stratified Random Sampling
+The best performing label noise detection algorithm based on clustering methods
+was proposed by \cite{Paris2019}. This method assumes the availability of a
+LULC map provided at a polygon level. The training set identification method is
+based on 3 steps:
+\begin{enumerate}
+  \item Polygon k-means clustering. Starts by clustering the points within each
+  separate polygon using the K-Means clustering algorithm and the Calinski
+  Harabasz index (CHi) to automatically determine the optimal number of
+  clusters for each polygon. The majority cluster of each polygon passes on to
+  the next step, while all pixels belonging to the minority clusters are
+  dropped and disregarded for potential training set candidates. Figure
+  \ref{fig:paris-kmeans} depicts a qualitative example of this step.
 
-\subsubsection{Variations on cluster-based methods}
+  \item Polygon consistency analysis. Majority clusters are submitted to
+  consistency analysis, which is done by computing each cluster's Bhattacharyya
+  distance (B-distance) to compute the similarity of each subset to the entire
+  set of clusters of the corresponding class. Afterwards, the clusters with
+  distance from the entire set of clusters smaller than the
+  65\textsuperscript{th} percentile of the cluster distances are selected for
+  Stratified Random Sampling.
+
+  \item Stratified Random Sampling. This step ensures the generation of a
+  balanced dataset, proportionate to the original class ratios.
+\end{enumerate}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{paris_kmeans_results.png}
+  \caption{Qualitative example of polygon k-means clustering result. (a)
+  Original polygon associated to the “crop” label. (b) Dominant land-cover
+  class detected C1. (c) First minor class detected C2 (road). (d) Second minor
+  class detected C3 (river). Source: \cite{Paris2019}}
+  \label{fig:paris-kmeans}
+\end{figure}
+
+Through qualitative analysis, this method achieved satisfactory results.
+Regardless, it is difficult to accurately determine the quality of these
+results without reference data.
+
+\subsubsection*{Variations on cluster-based methods}
 TODO
 
 \subsection*{Classifier-based methods}
-TODO
 
-\subsubsection{Variations on classifier-based methods}
+All classifier-based methods take a quantitative approach to the problem.
+Typically, these methods minimise either one of two errors. On the one hand,
+instances incorrectly tagged as mislabeled represent an E1 error. On the other
+hand, mislabeled instances left untagged represent an E2 error. Figure
+\ref{fig:types-detection-errors} shows a visual representation of the two types
+of error.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.6\linewidth]{detection_errors_types.png}
+  \caption{Types of detection errors. Adapted from \cite{Brodley1999}.}
+  \label{fig:types-detection-errors}
+\end{figure}
+
+
+\subsubsection*{Variations on classifier-based methods}
 TODO
 
 \section{Classification Methods}
