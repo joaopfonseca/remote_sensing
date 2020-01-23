@@ -197,7 +197,7 @@ reduce a dataset's dimensionality.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1\linewidth]{dimensionality_reduction.png}
+	\includegraphics[width=.8\linewidth]{dimensionality_reduction.png}
   \caption{Dimensionality Reduction Techniques}
   \label{fig:dimensionality-reduction}
 \end{figure}
@@ -256,7 +256,16 @@ data used \cite{Boukir2019}. Although classification is an important task in
 remote sensing, obtaining well-labelled data is time consuming, impracticable
 and expensive \cite{Pelletier2017Filtering}. Although no systematic review on
 data selection/filtering methods for the remote sensing domain was found, 2
-distinct types of filtering were identified.
+distinct types of filtering were identified, each dividing into 2 subgroups.
+Figure \ref{fig:noisy-label-detection} depicts the different methods found for
+this purpose.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{noisy_label_detection.png}
+  \caption{Different types of methods found for noisy label detection.}
+  \label{fig:noisy-label-detection}
+\end{figure}
 
 LULC maps are commonly presented in a shapefile format. A recent study
 employed polygon membership information for each pixel to detect labelling
@@ -283,7 +292,7 @@ significant limitations).
 
 % In order to add an unnumbered section/chapter:
 %\addcontentsline{toc}{section}{Uppgift 1}
-\subsection*{Cluster-based methods}
+\subsection*{Unsupervised methods}
 
 The best performing label noise detection algorithm based on clustering methods
 was proposed by \cite{Paris2019}. This method assumes the availability of a
@@ -313,23 +322,28 @@ based on 3 steps:
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{paris_kmeans_results.png}
-  \caption{Qualitative example of polygon k-means clustering result. (a)
-  Original polygon associated to the “crop” label. (b) Dominant land-cover
-  class detected C1. (c) First minor class detected C2 (road). (d) Second minor
-  class detected C3 (river). Source: \cite{Paris2019}}
+  \caption[Qualitative example of polygon k-means clustering
+  result. Source: \cite{Paris2019}]{Qualitative example of polygon k-means
+  clustering result. (a) Original polygon associated to the “crop” label. (b)
+  Dominant land-cover class detected C1. (c) First minor class detected C2
+  (road). (d) Second minor class detected C3 (river). Source: \cite{Paris2019}}
   \label{fig:paris-kmeans}
 \end{figure}
 
 Through qualitative analysis, this method achieved satisfactory results.
-Regardless, it is difficult to accurately determine the quality of these
+Regardless, it is difficult to determine the quality of these
 results without reference data.
 
-\subsubsection*{Variations on cluster-based methods}
-TODO
+Other approaches include the use of autoencoders. Each class is used to train
+an autoencoder, allowing the models to learn how to make latent representations
+of instances belonging to a single class. For each instance, a reconstruction
+error will be computed, using it as the mislabel score (the higher the error,
+the more likely the instance is mislabeled) \cite{Zhang2019}.
 
-\subsection*{Classifier-based methods}
 
-All classifier-based methods take a quantitative approach to the problem.
+\subsection*{Supervised methods}
+
+All supervised methods take a quantitative approach to the problem.
 Typically, these methods minimise either one of two errors. On the one hand,
 instances incorrectly tagged as mislabeled represent an E1 error. On the other
 hand, mislabeled instances left untagged represent an E2 error. Figure
@@ -343,9 +357,90 @@ of error.
   \label{fig:types-detection-errors}
 \end{figure}
 
+Supervised methods can be divided into 2 subgroups:
+\begin{enumerate}
+  \item Single model approaches. They use a single model to determine wether a
+  specific instance is correctly labelled. A common implementation includes the
+  use of a standard classifier to predict the label of an instance and tagging
+  it as mislabeled if the classifier's prediction differs from the original
+  label \cite{Brodley1999}.
+  \item Ensemble-based approaches. They use a set of weak classifiers (most
+  commonly Decision Trees) to generate a number of output predictions. These
+  classifiers are always trained in a subset of the dataset, which are then
+  used to predict the label of the remaining dataset. Consequently, this set of
+  classifiers is trained $k$ times, depending on the number of splits used in
+  the data stratification. These predictions are then changed to a binary
+  output of correct/incorrect prediction according to the original label. The
+  more incorrect predictions over a single instance there are, the more likely
+  it is for it to be tagged as mislabeled. The methods for aggregation of the
+  set of individual votes to compute the final score differ according to the
+  method used.
+\end{enumerate}
 
-\subsubsection*{Variations on classifier-based methods}
-TODO
+Single model approaches benefit from reduced computation power and generally
+improve the quality of the training set generated, although they rarely
+outperform any ensemble-based approach \cite{Brodley1999, Garcia-Gil2019,
+Boukir2019, Pelletier2017Filtering, Zhang2018, Yuan2018}.
+
+Within ensemble-based approaches there is a simple underlying calculation of a
+mislabel likelihood (henceforth referred to as mislabel ratio). For traditional
+methods the calculation consists in a simple ratio between the count of
+incorrect prediction over the total number of predictions:
+\begin{equation} \label{eq:mislabel-ratio}
+  MR(x) = \frac{n-\sum_{i=1}^{n}{v_i^y}}{n}
+\end{equation}
+Where $n$ is the number of predictions for an instance $x$ and $v_i^y$ is 0 if
+the predicted label differs from the true label, 1 otherwise. Although any
+threshold could be set for $MR$ in order to consider an instance's label
+incorrect, most of the literature uses 2 different thresholds, referred to as
+consensus ($MR=1$, i.e., all predictors fail to classify an instance's true
+label) and majority filtering ($MR\geq0.5$, i.e., the majority of predictors
+fail to classify an instance's true label). Therefore, consensus filters focus
+on the minimisation of E1 error whilst majority filtering minimises E2 error
+\cite{Brodley1999, Yuan2018}. Other methods have been used to measure mislabel
+likelihood. \cite{Boukir2019} proposed an ensemble margin score, defined as:
+\begin{equation} \label{eq:ensemble-margin}
+  EM(x) = \frac{2\sum_{i=1}^{n}{v_i^y}-n}{n-\sum_{i=1}^{n}{v_i^y}}
+\end{equation}
+
+Both majority and consensus filtering have been used in a number of recent
+publications \cite{Garcia-Gil2019, Boukir2019, Pelletier2017Filtering,
+Zhang2018, Yuan2018}. Some of these methods \cite{Boukir2019, Yuan2018}
+achieved improved performance by implementing an iterative approach to the
+problem, consisting in multiple applications of filtering process a dataset,
+gradually reducing its size on each iteration. Figure
+\ref{fig:ensemble-filter-pipeline} provides a visual representation of an
+ensemble-based filtering pipeline.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{enfilter_pipeline.png}
+  \caption{Ensemble-based approaches pipeline.}
+  \label{fig:ensemble-filter-pipeline}
+\end{figure}
+
+Isolation Forest (iForest) \cite{Liu2008} is another common method used for
+data filtering. It benefits from the use of a set of Isolation Trees (iTrees)
+that attempt to isolate each instance within the dataset. The rationale behind
+this algorithm consists in the measurement of the average path length an
+instance goes through in all iTrees, assuming that an anomaly (in this case, a
+mislabeled instance) has a different profiles than that of the remaining
+population of the corresponding label. Consequently, a mislabelled instance is
+expected to have a smaller path length than that of a correctly classified
+instance, as demonstrated in Figure \ref{fig:iforest-demonstration}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.5\linewidth]{iforest_demo.png}
+  \caption[Anomaly detection using the iForest algorithm.]{Anomaly detection
+  using the iForest algorithm. Anomalies are more susceptible to isolation and
+  hence have short path lengths. (a) a normal point $x_i$ requires twelve
+  random partitions to be isolated; (b) an anomaly $x_o$ requires only four
+  partitions to be isolated. (c) averaged path lengths of $x_i$ and $x_o$
+  converge when the number of trees increases. Source: \cite{Liu2008}}
+  \label{fig:iforest-demonstration}
+\end{figure}
+
 
 \section{Classification Methods}
 TODO
