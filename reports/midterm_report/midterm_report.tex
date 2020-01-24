@@ -43,7 +43,7 @@
 
 % Adds hyperlinks to references and ToC
 \usepackage{hyperref}
-\hypersetup{hidelinks,linkcolor = blue} % Changes the link color and hides the
+\hypersetup{hidelinks} % Changes the link color and hides the
 % hideous red border that usually is created
 
 % If multiple images are to be added, a folder (path) with all the images can
@@ -252,10 +252,11 @@ TODO
 \section{Data Filtering Methods}
 
 The accuracy of a classifier is directly affected by the quality the training
-data used \cite{Boukir2019}. Although classification is an important task in
+data used \cite{Boukir2019}. Despite the importance of classification tasks in
 remote sensing, obtaining well-labelled data is time consuming, impracticable
-and expensive \cite{Pelletier2017Filtering}. Although no systematic review on
-data selection/filtering methods for the remote sensing domain was found, 2
+and expensive \cite{Pelletier2017Filtering}. To the best of our knowledge there
+is no systematic review on data selection/filtering methods for the remote
+sensing domain. Through the analysis of the different algorithms available, 2
 distinct types of filtering were identified, each dividing into 2 subgroups.
 Figure \ref{fig:noisy-label-detection} depicts the different methods found for
 this purpose.
@@ -323,10 +324,10 @@ based on 3 steps:
 	\centering
 	\includegraphics[width=1\linewidth]{paris_kmeans_results.png}
   \caption[Qualitative example of polygon k-means clustering
-  result. Source: \cite{Paris2019}]{Qualitative example of polygon k-means
-  clustering result. (a) Original polygon associated to the “crop” label. (b)
-  Dominant land-cover class detected C1. (c) First minor class detected C2
-  (road). (d) Second minor class detected C3 (river). Source: \cite{Paris2019}}
+  result.]{Qualitative example of polygon k-means clustering result. (a)
+  Original polygon associated to the “crop” label. (b) Dominant land-cover
+  class detected C1. (c) First minor class detected C2 (road). (d) Second minor
+  class detected C3 (river). Source: \cite{Paris2019}}
   \label{fig:paris-kmeans}
 \end{figure}
 
@@ -353,7 +354,8 @@ of error.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=.6\linewidth]{detection_errors_types.png}
-  \caption{Types of detection errors. Adapted from \cite{Brodley1999}.}
+  \caption[Types of detection errors.]{Types of detection errors. Adapted from
+  \cite{Brodley1999}.}
   \label{fig:types-detection-errors}
 \end{figure}
 
@@ -431,7 +433,7 @@ instance, as demonstrated in Figure \ref{fig:iforest-demonstration}.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=.5\linewidth]{iforest_demo.png}
+	\includegraphics[width=1\linewidth]{iforest_demo.png}
   \caption[Anomaly detection using the iForest algorithm.]{Anomaly detection
   using the iForest algorithm. Anomalies are more susceptible to isolation and
   hence have short path lengths. (a) a normal point $x_i$ requires twelve
@@ -442,18 +444,47 @@ instance, as demonstrated in Figure \ref{fig:iforest-demonstration}.
 \end{figure}
 
 
+
 \section{Classification Methods}
+
+The most common classifiers identified for land cover image classification are
+Random Forests (RFC), Support Vector Machines (SVM), K-Nearest Neighbours
+(KNN), artificial neural networks (ANN), Maximum Likelihood (ML) and Decision
+Trees (DT) \cite{Khatami2016, Maxwell2018}. However, recent literature has
+focused on the implementation of robust classifiers such as Convolutional
+Neural Networks with varying structures, Random Forests and Autoencoders
+\cite{Roy2019, Zhang2017, Li2016}.
+
+\subsection*{Convolutional Neural Networks}
+TODO
+
+Hybrid Spectral Net
+
+ResNet
+
+\subsection*{Random Forests}
+TODO
+
+\subsection*{Autoencoders}
 TODO
 
 \chapter{Methodology}
+
+This chapter describes the work developed so far, along with the models implemented for each phase the pipeline that will ultimately produce an algorithm able to output an accurate LULC map.
+
+The implementation of the experimental procedure was based on the Python programming language, all functions, algorithms, experiments, and results reported are available in the project's \textcolor{blue}{\href{https://github.com/joaopfonseca/remote_sensing}{Github repository}}.
 
 \section{Datasets}
 
 \section{Preprocessing}
 
-\section{Data Filtering}
+\subsection{Dimensionality Reduction}
+
+\subsection{Data Filtering}
 
 \section{Classification}
+
+\section{Experiment Settings}
 
 \chapter{Results and Discussion}
 
