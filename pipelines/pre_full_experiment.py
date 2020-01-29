@@ -21,12 +21,15 @@ from rfpimp import importances as permutation_importances, plot_importances
 # classifiers
 from sklearn.ensemble import RandomForestClassifier
 
+# reporting
+from src.reporting.reports import reports
+
 ## configs
 DATA_PATH = PROJ_PATH+'/data/DGT/central_pt/'
 RAW_PATH = DATA_PATH+'raw/'
 PROCESSED_PATH = DATA_PATH+'processed/'
 TRAIN_DATA = RAW_PATH+'training.csv'
-TEST_PATH = RAW_PATH+'testing.csv'
+TEST_DATA = RAW_PATH+'testing.csv'
 LABELS_PATH = RAW_PATH+'Class_legend.txt'
 
 random_state = 0
@@ -79,6 +82,55 @@ feat_sel_results = pd.DataFrame(
     columns=['Gini', 'Permutation', 'Selected']
 )
 feat_sel_results.to_csv(PROCESSED_PATH+'feature_selection_results.csv')
+
+################################################################################
+## test different methods using test set
+df_train = pd.read_csv(TRAIN_DATA).drop(columns='Unnamed: 0')
+X_train = df_train.drop(columns='CLASS')
+y_train = df_train['CLASS'].astype(int)
+
+df_test  = pd.read_csv(TEST_DATA).drop(columns='Unnamed: 0')
+X_test = df_test.drop(columns='CLASS')
+y_test = df_test['CLASS'].astype(int)
+
+features_selected = pd.read_csv(PROCESSED_PATH+'feature_selection_results.csv')\
+    .rename(columns={'Unnamed: 0': 'features'}).set_index('features')
+features_selected['Original'] = True
+
+#pd.DataFrame(features_selected[features_selected].count(),
+#    columns=['# features used'])\
+#    .sort_values('# features used', ascending=False)\
+#    .to_csv('feature_selection_count.csv')
+
+# get feature names and labels
+feat_labels = list(X_train.columns)
+class_labels = pd.read_csv(LABELS_PATH, sep='\t', header=None,
+    index_col=0)[1].to_dict()
+
+# standardize
+scaler = StandardScaler()
+scaler.fit(X_train)
+scaler.transform(X_train.values, copy=False)
+scaler.transform(X_test.values, copy=False)
+
+scores = []
+for method in features_selected.columns:
+    rfc = RandomForestClassifier(100, random_state=0)
+    features = features_selected[method]
+    _X_tr = X_train[features[features].index]
+    _y_tr = y_train.copy()
+    rfc.fit(_X_tr, _y_tr)
+    _X_te = X_test[features[features].index]
+    _y_te = y_test.copy()
+    _y_pred = rfc.predict(_X_te)
+    scores.append(reports(_y_te, _y_pred)[-1].rename({'Score': method}))
+
+pd.DataFrame(features_selected[features_selected].count(),
+    columns=['# features used'])\
+    .join(pd.concat(scores, 1).T)\
+    .sort_values('# features used', ascending=False)\
+    .rename(index={'Selected':'Intersect'})\
+    .to_csv('feature_selection_results.csv')
 
 
 ################################################################################

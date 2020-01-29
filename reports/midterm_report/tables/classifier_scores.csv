@@ -1,0 +1,4 @@
+Score,RF,HSN,MLPAE,ResNet50
+OA,0.674,0.700,0.717,\textbf{0.762}
+F-Score,0.354,0.378,0.318,\textbf{0.422}
+G-Mean,0.559,0.573,0.540,\textbf{0.628}

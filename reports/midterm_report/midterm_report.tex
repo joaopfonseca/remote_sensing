@@ -2,11 +2,25 @@
 
 \documentclass[12pt, english, openany]{book}
 
-\usepackage[]{graphicx}
-\usepackage[]{color}
+\usepackage{graphicx}
+\usepackage{color}
 \usepackage{alltt}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\newcommand{\inlineeqnum}{\refstepcounter{equation}~~\mbox{(\theequation)}}
+\usepackage{enumitem}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{booktabs}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.14}
+\usepackage{longtable}
+\usepackage{tabu}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
 \setlength{\parskip}{\bigskipamount} % sets paragraph spacing
@@ -31,7 +45,7 @@
 \titleformat{\chapter}
    {\normalfont\LARGE\bfseries}{\thechapter.}{1em}{}
 % Change distance between chapter header and text
-\titlespacing{\chapter}{0pt}{25pt}{2\baselineskip}
+\titlespacing{\chapter}{0pt}{25pt}{\baselineskip}
 
 % Adds table captions above the table per default
 \usepackage{float}
@@ -90,12 +104,13 @@
 
 \chapter*{Abstract}
 
-This report documents the work developed towards the research project "IPSTERS
-- IPSentinel Terrestrial Enhanced Recognition System". It focuses on the
-exploration of several machine learning (ML) techniques, covering different
-stages of a Land Use/Land Cover Classification (LULC) pipeline. These
-techniques aim to minimise problems typically found in this kind of data,
-namely data ingestion, feature selection, data filtering and classification.
+This report documents the work developed up to this point towards the research
+project "IPSTERS - IPSentinel Terrestrial Enhanced Recognition System". It
+focuses on the exploration of several machine learning (ML) techniques,
+covering different stages of a Land Use/Land Cover Classification (LULC)
+pipeline. These techniques aim to minimise problems typically found in this
+kind of data, namely data ingestion, feature selection, data filtering and
+classification.
 
 
 
@@ -145,15 +160,31 @@ remotely sensed data, to produce level-3 products for land applications with
 the least amount of human intervention. We propose exploring two artificial
 intelligence approaches, one applying active learning techniques and another
 based on fuzzy logic.
-\\
-Data used
-\\
-Code availability here
-\\
-Research grant info
+
+Specifically, this report focuses on the exploration of techniques to
+improve the quality of LULC map outputs by the model under development. As
+such, topics such as Dimensionality Reduction, Anomaly Detection and
+Classification methods will be discussed.
+
+Most of the work developed so far (excluding presentations and all preliminary
+experiments) is available in the Github repositories of the project:
+\begin{enumerate}
+  \item \href{https://github.com/joaopfonseca/remote_sensing}{
+  \textbf{remote-sensing:} Includes all experiments except data
+  filtering/anomaly detection methods.}
+  \item \href{https://github.com/joaopfonseca/data-filtering}{
+  \textbf{data-filtering:} Includes experiments ran for data filtering/anomaly
+  detection methods.}
+\end{enumerate}
+
 
 \section{Document Structure}
 
+This document is organised in 4 chapters. Chapter 2 analyses the state of the
+art on dimensionality reduction, data filtering and classification methods.
+Chapter 3 provides a brief overview of the datasets used, preprocessing methods
+experimented and classification methods tested. Chapter 4 presents the results
+obtained for each of these topics.
 
 \chapter{Literature Review}
 
@@ -189,7 +220,7 @@ Finally, classification algorithms are discussed in the last section. These
 algorithms should be resistant to noise and/or have correcting measures to
 decrease the effect of the noisy data in the model's learning phase.
 
-\section{Dimensionality Reduction Methods}
+\section{Dimensionality Reduction Methods} \label{sec:dimensionality-reduction-LR}
 Dimensionality reduction techniques can be divided into 2 parts, feature
 selection and feature extraction, both techniques explored below. Figure
 \ref{fig:dimensionality-reduction} depicts the different types of techniques to
@@ -246,8 +277,9 @@ to a classifier using all available features).
 
 
 \subsection*{Feature Extraction}
-TODO
 
+\textbf{NOTE:} We haven't focused on this part yet, it's going to be the next
+step.
 
 \section{Data Filtering Methods}
 
@@ -456,37 +488,250 @@ Neural Networks with varying structures, Random Forests and Autoencoders
 \cite{Roy2019, Zhang2017, Li2016}.
 
 \subsection*{Convolutional Neural Networks}
-TODO
 
-Hybrid Spectral Net
+\textbf{NOTE:} We still haven't focused on this part, what is presented here is
+just to document relevant algorithms that I have found along the process.
 
-ResNet
+Convolutional Neural Networks (CNN) are a type of deep learning networks,
+commonly applied in image data. Figure \ref{fig:cnn-example} shows a visual
+representation of the basic mechanisms within a typical CNN. This type of
+classifier has been extensively used for LULC classification and has achieved
+state of the art results in reference datasets such as Indian Pines.
+% citation needed!
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{cnn_example.png}
+  \caption{Typical Convolutional Neural Network example.}
+  \label{fig:cnn-example}
+\end{figure}
+
+A particular CNN implementation specific to multi/hyper-spectral imaging
+classification is the Hybrid Spectral Net \cite{Roy2019}. This CNN consists of
+a set of three 3D convolutions (as opposed to the conventional 2D
+convolutions), performing both Spectral and Spatial feature learning, and one 2D
+convolution, followed by two fully connected hidden layers. This model achieved
+state-of-the-art performance on the Indian dataset and was one of the first
+models to implement a CNN architecture based on both 3D and 2D convolutions.
+
+Another CNN implementation is the Residual Neural Network (ResNet)
+\cite{He2016}. Its architecture allows the construction of very deep networks
+while circumventing the so-called vanishing gradient problem. This algorithm
+along with other deep neural networks have been tested for land cover
+classification, achieving state-of-the-art classification accuracies
+\cite{Mahdianpari2018}.
 
 \subsection*{Random Forests}
-TODO
+
+Random Forest Classifiers were originally proposed by \cite{Ho1995}. RFCs are
+an ensemble learning method that combine a set of decision trees, each using a
+random subspace of the original feature set. Random Forests correct the
+Decision tree's tendency to overfit by using the mode of the prediction of
+individual trees as its final prediction.
 
 \subsection*{Autoencoders}
-TODO
+\textbf{NOTE:} Usage of autoencoders as classifiers will require additional
+research
 
 \chapter{Methodology}
 
-This chapter describes the work developed so far, along with the models implemented for each phase the pipeline that will ultimately produce an algorithm able to output an accurate LULC map.
+This chapter describes the work developed so far, along with the models
+implemented for each phase the pipeline that will ultimately produce an
+algorithm able to output an accurate LULC map.
 
-The implementation of the experimental procedure was based on the Python programming language, all functions, algorithms, experiments, and results reported are available in the project's \textcolor{blue}{\href{https://github.com/joaopfonseca/remote_sensing}{Github repository}}.
+The implementation of the experimental procedure was based on the Python
+programming language, all functions, algorithms, experiments, and results
+reported are available in the Github repository of the \href{https://github.com/joaopfonseca/remote_sensing}{project}.
 
 \section{Datasets}
+
+For the experiments reported below four datasets are used. One employs spectral
+information from the Landsat-8 Satellite with LUCAS reference data (henceforth
+named as the LUCAS dataset). The second uses Sentinel 2 data along with
+COSsim+2018. The third corresponds to sampled points out of Sentinel 2 images
+and the labels were extracted from the EU's agricultural survey. The fourth one
+is used to test classifiers. It consists of a Sentinel-2 Satellite image from
+August 2015 to which COS 2015 was overlaid, the study area covers a region
+around Coimbra, Portugal (see Figure \ref{fig:sentinel2+cos2015}).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.7\linewidth]{sentinel2_cos.png}
+  \caption{Study area of dataset used to test classifiers.}
+  \label{fig:sentinel2+cos2015}
+\end{figure}
+
+Since the size of the entire tile is too large to be processed in a timely
+manner, a subspace of the image will be used. Figure
+\ref{fig:classifier-study-area} shows the train (top row, outer non-highlighted
+area) and test (bottom row) areas along with its true colour image (left column)
+and ground truth (right column) used to assess the accuracy on each classifier.
+As such, any pixel and/or neighbouring pixels used for training will never
+appear in the test set, making them distinct sets.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{classifier_study_area.png}
+  \caption[Subset of study area used to test classifiers.]{Subset of study area
+  used to test classifiers. The top row, outer non-highlighted area is the train
+  set, while the bottom row area is the test set. The left column shows their
+  true colour image and the right column shows the ground truth.}
+  \label{fig:classifier-study-area}
+\end{figure}
+
+\section{Preprocessing}
+
+In order to extract the data set from the images, a negative buffer was applied
+on labelled polygons in order to avoid border pixels, which are frequently
+mislabeled. Afterwards, a set of experiments was conducted separately for each
+different topic of interest.
+
+An experiment will be run in order to test different feature selection
+methods. The methods applied are the Random Forest Method, Permutation Feature
+Importance and the intersection of both. An Overall Accuracy will be provided
+after training a RFC with each method's selected features.
+
+A set of filters will be tested on the LUCAS dataset. In order to check each
+method's robustness to noise detection, different levels of noise is introduced
+for each test. The noise is introduced based on combinations of labels that are
+difficult to distinguish by a classifier. This is done through the training of
+a Random Forest on the original dataset and extracting these label pairs from
+the confusion matrix. This way, we avoid random noise and approach the type of
+noise that could be found in a real scenario.
+
+An additional filtering method will be tested, combining clustering and
+ensemble methods. As a first stage, en ensemble filter composed of two RFC with
+10 and 25 estimators, a logistic regression, a single Decision Tree and a
+Multilayer Perceptron Classifier is used. Simultaneously, a Minibatch K-Means
+clustering algorithm is run for each class. The number of K is calculated using
+a granularity measure:
+\begin{equation} \label{eq:k-granularity-formula}
+  K(granularity) = int(granularity\sqrt{size(X)})
+\end{equation}
+Where $granularity$ is a hyperparameter and $X$ is the feature matrix.
+Afterwards, the average filtering results are computed per cluster and the top
+$n$\% mislabeled clusters per class are discarded from the training dataset.
+This method also ensures that at least one cluster per class is kept and the
+threshold to define $n$ can be done either through a threshold for the mislabel
+rate or a threshold for the minimum percentage of observations to be kept.
+
+Additionally, for traditional methods like majority and consensus filtering the
+number of $K$ splits is set up as a hyperparameter, as opposed to the
+predefined $K=4$ used in the literature.
+
+\section{Classification}
+
+The classifiers tested include the ones listed in the literature review: Random
+Forest Classifier, Hybrid Spectral Net, fully connected autoencoder and
+ResNet50 (with 2 fully connected layers, a total of 52 hidden layers).
+
+\chapter{Results}
 
 \section{Preprocessing}
 
 \subsection{Dimensionality Reduction}
 
+The methods applied are described in section
+\ref{sec:dimensionality-reduction-LR}. The Gini method is the calculation of
+the importance of a feature using the (normalised) total reduction of the Gini
+criterion brought by that feature. Permutation is the shuffling of a feature
+after training a classifier and measuring the accuracy difference, returning
+the most important features as the ones that cause the highest accuracy drop.
+The Intersect method is the intersection of both methods, maintaining only the
+features that are selected with both methods. The results of the experiment
+were obtained by training a RFC using the selected features for each method and
+are presented in Table \ref{tab:feature-selection}.
+
+
+\pgfplotstabletypeset[
+	begin table=\begin{longtable},
+		end table=\end{longtable},
+	col sep=comma,
+	header=true,
+	columns={Selection Method,Nbr of features used,Accuracy,F-Score,G-Mean},
+	columns/Selection Method/.style={column type=l,string type},
+  columns/Nbr of features used/.style={column type=l,string type},
+	columns/Accuracy/.style={column type=l,string type},
+  columns/F-Score/.style={column type=l,string type},
+  columns/G-Mean/.style={column type=l,string type},
+	every head row/.style={before row=\toprule, after row=\midrule\endhead},
+	every last row/.style={after row=\bottomrule
+			\\\caption{\label{tab:feature-selection}Feature selection results
+      using the third dataset (agriculture labels).}}
+]{tables/feature_selection_results.csv}
+
+
 \subsection{Data Filtering}
+
+Figure \ref{tab:data-filtering} shows the Overall Accuracy of a RFC trained with
+filtered datasets using each of the filters presented. Note that all methods are
+tuned for optimal performance on the given dataset, as opposed to the fixed
+parameters commonly used in majority, single and consensus filters.
+
+\textbf{TODO:} Add iForest to experiment
+
+\pgfplotstabletypeset[
+	begin table=\begin{longtable},
+		end table=\end{longtable},
+	col sep=comma,
+	header=true,
+	columns={Method,0,5,10,20,30,40},
+  columns/Method/.style={column type=l,string type},
+	columns/0/.style={column type=l,string type},
+  columns/5/.style={column type=l,string type},
+	columns/10/.style={column type=l,string type},
+  columns/20/.style={column type=l,string type},
+  columns/30/.style={column type=l,string type},
+  columns/40/.style={column type=l,string type},
+	every head row/.style={before row=\toprule, after row=\midrule\endhead},
+	every last row/.style={after row=\bottomrule
+			\\\caption{\label{tab:data-filtering}Data filtering results
+      using the LUCAS dataset. Column labels represent the different levels
+      of noise introduced in the original dataset.}}
+]{tables/filtering_results.csv}
+
 
 \section{Classification}
 
-\section{Experiment Settings}
+The Overall Accuracy (OA), F-Score and Geometric mean (G-Mean) for each
+classifier's prediction on the test area is shown in table
+\ref{tab:classification-scores}.
 
-\chapter{Results and Discussion}
+
+\pgfplotstabletypeset[
+	begin table=\begin{longtable},
+		end table=\end{longtable},
+	col sep=comma,
+	header=true,
+	columns={Score,RF,HSN,MLPAE,ResNet50},
+	columns/Score/.style={column type=l,string type},
+  columns/RF/.style={column type=l,string type},
+	columns/HSN/.style={column type=l,string type},
+  columns/MLPAE/.style={column type=l,string type},
+  columns/ResNet50/.style={column type=l,string type},
+	every head row/.style={before row=\toprule, after row=\midrule\endhead},
+	every last row/.style={after row=\bottomrule
+			\\\caption[Classification scores.]
+      {\label{tab:classification-scores}Classification scores using the
+      classifiers fitted to the training area with predictions made on the test
+      area shown in Figure \ref{fig:classifier-study-area}. Legend: Overall
+      Accuracy (OA), Geometric Mean (G-Mean), Random Forest Classifier (RF),
+      Hybrid Spectral Net (HSN), Autoencoder-based multilayer perceptron
+      (MLPAE), Residual Neural Network with 50 layers and 2 fully-connected
+      layers (ResNet50).}}]{tables/classifier_scores.csv}
+
+The maps generated by each classifier is displayed in Figure
+\ref{fig:classification-prediction-maps}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.8\linewidth]{maps_classifiers.png}
+  \caption[Generated maps per classifier.]{Generated maps per classifier. (a)
+  True color image; (b) Ground truth; (c) Random Forest Classifier; (d) Hybrid
+  Spectral Net; (e) Autoencoder-based multilayer perceptron; (f) Residual
+  Neural Network.}
+  \label{fig:classification-prediction-maps}
+\end{figure}
 
 
 

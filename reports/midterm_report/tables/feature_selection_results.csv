@@ -1,0 +1,5 @@
+Selection Method,Nbr of features used,Accuracy,F-Score,G-Mean
+Original,180,0.755,0.761,0.862
+Gini,121,0.750,0.758,0.861
+Permutation,58,0.749,0.760,0.863
+Intersect,45,0.741,0.752,0.858
