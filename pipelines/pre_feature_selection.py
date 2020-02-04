@@ -56,7 +56,7 @@ _X_tr, _X_te, _y_tr, _y_te = train_test_split(X, y, test_size=0.4,
     random_state=random_state)
 
 # Create and train a random forest classifier
-clf = RandomForestClassifier(n_estimators=1000, n_jobs=-1,
+clf = RandomForestClassifier(n_estimators=100, n_jobs=-1,
     random_state=random_state)
 clf.fit(_X_tr, _y_tr)
 
