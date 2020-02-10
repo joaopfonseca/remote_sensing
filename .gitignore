@@ -1,3 +1,20 @@
+# etc
+*.zip
+images/
+organized_images/
+
+# shapefiles
+*.dbf
+*.prj
+*.sbn
+*.sbx
+*.shp
+*.shp.xml
+*.shx
+*.cpg
+*.qpj
+*.gpkg
+
 # Keras models are too large to upload
 *.hdf5
 

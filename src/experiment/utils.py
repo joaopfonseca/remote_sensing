@@ -81,3 +81,10 @@ def check_pipelines(objects_list, random_state, n_runs):
         param_grid.append(grids)
 
     return pipelines, param_grid
+
+def check_fit_params(fit_params):
+    _fit_params = {}
+    for model_name, fit_p_dict in dict(fit_params).items():
+        for param_name, fit_param in dict(fit_p_dict).items():
+            _fit_params[f'{model_name}__{param_name}'] = fit_param
+    return _fit_params

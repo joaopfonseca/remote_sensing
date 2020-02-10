@@ -69,13 +69,13 @@ class PerClassiForest(BaseCleaningSampler):
             self.iforests[label] = iforest.fit(X[y==label])
         return self
 
-    def transform(self, X, y):
+    def resample(self, X, y):
         outcome = np.zeros(X.shape[0])
         for label in np.unique(y):
             outcome[y==label] = self.iforests[label].predict(X[y==label])
         return X[outcome==1], y[outcome==1]
 
-    def fit_transform(self, X, y):
+    def _fit_resample(self, X, y):
         self.iforests = {}
         outcome = np.zeros(X.shape[0])
         for label in np.unique(y):
@@ -83,6 +83,9 @@ class PerClassiForest(BaseCleaningSampler):
             outcome[y==label] = iforest.fit_predict(X[y==label])
             self.iforests[label] = iforest.fit(X[y==label])
         return X[outcome==1], y[outcome==1]
+
+    def fit_resample(self, X, y):
+        return self._fit_resample(X, y)
 
 
 
@@ -98,7 +101,7 @@ class ParisDataFiltering(BaseCleaningSampler):
     def fit(self, X, y, ids=None):
         return self
 
-    def transform(self, X, y, ids=None):
+    def resample(self, X, y, ids=None):
         if ids is None:
             ids=y
 
@@ -128,8 +131,12 @@ class ParisDataFiltering(BaseCleaningSampler):
 
         return X[final_status]
 
-    def fit_transform(self, X, y, ids=None):
+    def _fit_resample(self, X, y, ids=None):
         return self.transform(X, y, ids)
+
+    def fit_resample(self, X, y, ids=None):
+        return self.resample(X, y, ids)
+
 
 def _find_optimal_k_and_cluster(X, k_max=12, random_state=None):
     label_list = []

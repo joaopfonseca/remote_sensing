@@ -3,6 +3,8 @@
 """
 Copyright (c) 2016 Randal S. Olson
 
+Adapted by João Fonseca
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without restriction,
 including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -22,8 +24,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from __future__ import print_function
 import numpy as np
 from sklearn.neighbors import KDTree
+from imblearn.under_sampling.base import BaseCleaningSampler
 
-class ReliefF(object):
+class ReliefF(BaseCleaningSampler):
 
     """Feature selection using data-mined expert knowledge.
 
@@ -91,7 +94,7 @@ class ReliefF(object):
 
         self.top_features = np.argsort(self.feature_scores)[::-1]
 
-    def transform(self, X):
+    def resample(self, X, y):
         """Reduces the feature set down to the top `n_features_to_keep` features.
 
         Parameters
@@ -106,3 +109,7 @@ class ReliefF(object):
 
         """
         return X[:, self.top_features[self.n_features_to_keep]]
+
+    def _fit_resample(self, X, y):
+        self.fit(X, y)
+        return self.resample(X, y)
