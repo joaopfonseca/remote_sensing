@@ -123,7 +123,7 @@ class ProductReader:
         return self
 
     def _get_band_name(self, band_path):
-        return band_path.split('_')[-1].split('.')[0]
+        return 'B'+band_path.split('B')[-1].split('_')[0]
 
     def to_pandas(self):
 
@@ -225,20 +225,15 @@ class SentinelProductReader(ProductReader):
         if bands_path and type(bands)==list:
             self.bands = bands
         elif bands_path and not bands:
-            self.bands = [self._get_band_name(x) for x in os.listdir(bands_path)]
+            self.bands = os.listdir(bands_path)
 
         if bands_path:
-            _b_prefix = [
-                x.replace(x.split('_')[-1],'')
-                for x in os.listdir(bands_path) if x.endswith('.jp2')
-            ]
 
             # assertion:
             # check if self.b_prefix length >= than bands length
 
-            b_prefix = _b_prefix[0]
             for band in self.bands:
-                band_path = os.path.join(bands_path, b_prefix+band+'.jp2')
+                band_path = os.path.join(self.bands_path, band)
                 self.add_band(band_path)
             #self.get_X_array()
 
@@ -248,7 +243,7 @@ class SentinelProductReader(ProductReader):
             raise TypeError('missing required argument \'label_col\'')
 
     def add_band(self, band_path):
-        band_name = self._get_band_name(band_path)
+        band_name = band_path.split('/')[-1]
         if band_name not in self.X_labels:
             band = rasterio.open(band_path, driver='JP2OpenJPEG')
             self.X.append(band.read(1))
