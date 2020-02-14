@@ -244,13 +244,14 @@ class SentinelProductReader(ProductReader):
 
     def add_band(self, band_path):
         band_name = band_path.split('/')[-1]
-        if band_name not in self.X_labels:
-            band = rasterio.open(band_path, driver='JP2OpenJPEG')
-            self.X.append(band.read(1))
-            self.X_labels.append(band_name)
-            self.meta.append(band.meta)
-        else:
-            raise ValueError(f'Band \'{band_name}\' already in X at index {self.X_labels.index(band_name)}.')
+        if band_name.endswith('.jp2'):
+            if band_name not in self.X_labels:
+                band = rasterio.open(band_path, driver='JP2OpenJPEG')
+                self.X.append(band.read(1))
+                self.X_labels.append(band_name)
+                self.meta.append(band.meta)
+            else:
+                raise ValueError(f'Band \'{band_name}\' already in X at index {self.X_labels.index(band_name)}.')
         return self
 
 

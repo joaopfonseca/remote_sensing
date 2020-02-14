@@ -2,6 +2,7 @@
 *.zip
 images/
 organized_images/
+T29SNC/data/
 
 # shapefiles
 *.dbf

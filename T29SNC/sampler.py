@@ -109,9 +109,10 @@ np.apply_along_axis(lambda idx: mask.itemset(tuple(idx),1), 1, df_coords_sampled
 
 for date in os.listdir(BANDS_PATH):
     if os.path.isdir(os.path.join(BANDS_PATH, date)):
+        print(date)
         img = SentinelProductReader(
             bands_path = BANDS_PATH+f'{date}/',
-            labels_shapefile = LABELS_SHAPEFILE,
+            labels_shapefile = LABELS_SHAPEFILE15,
             label_col = 'Megaclasse'
         )
         img.get_X_array()
@@ -124,4 +125,9 @@ for date in os.listdir(BANDS_PATH):
             for c in df.drop(columns=['x','y','Megaclasse']).columns
         }
         df = df.rename(columns=rename_mapper)
-        df.to_csv(os.path.join(CSV_SAVE_PATH,f'{date}.csv'), index=False)
+        index_maker = lambda base, var: (base-var)/(base+var)
+        df[f'{date}_NDVI'] = index_maker(base = df[f'{date}_B08'], var= df[f'{date}_B04'])
+        df[f'{date}_NDBI'] = index_maker(base = df[f'{date}_B11'], var= df[f'{date}_B08'])
+        df[f'{date}_NDMI'] = index_maker(base = df[f'{date}_B08'], var= df[f'{date}_B11'])
+        df[f'{date}_NDWI'] = index_maker(base = df[f'{date}_B08'], var= df[f'{date}_B12'])
+        df.sort_index(1).to_csv(os.path.join(CSV_SAVE_PATH,f'{date}.csv'), index=False)
