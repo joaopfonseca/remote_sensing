@@ -155,29 +155,24 @@ class HybridSpectralNet:
         return y_pred
 
 
-class HybridSpectralNetCustom:
+class PixelBasedHybridSpectralNet:
     """
     NOTE: 1st kernel size was changed from the original architecture
     """
-    def __init__(self, window_shape, output_units):
+    def __init__(self, input_shape, output_units, filepath='best_model.hdf5'):
         """input_shape: (height, width, num_bands)"""
-        self.height, self.width, self.num_bands = window_shape
+        self.height, self.width, self.num_bands = input_shape
         self.output_units = output_units
 
-        coords = Input((2,), dtype='int32')
-        x_coords = coords[:,0]
-        y_coords = coords[:,1]
-        self.img = K.variable(np.zeros((10,10)))
-
-        vertical_var = int(self.height/2)
-        horizontal_var = int(self.width/2)
-
         ## input layer
-        #self.input_layer = self.img[x_coords-vertical_var:x_coords+vertical_var,
-        #    y_coords-horizontal_var:y_coords+horizontal_var]
-        self.input_layer = Lambda(lambda x: x[x_coords-vertical_var, y_coords-horizontal_var])(self.img)
-        Crop()
-
+        self.input_layer = Input(
+            (
+                self.height,
+                self.width,
+                self.num_bands,
+                1
+            )
+        )
 
         ########################################################################
         # convolutional layers
@@ -185,18 +180,21 @@ class HybridSpectralNetCustom:
         self.conv_layer1 = Conv3D(
             filters=8,
             kernel_size=(3, 3, 2),
+            padding='same',
             activation='relu'
         )(self.input_layer)
 
         self.conv_layer2 = Conv3D(
             filters=16,
             kernel_size=(3, 3, 5),
+            padding='same',
             activation='relu'
         )(self.conv_layer1)
 
         conv_layer3 = Conv3D(
             filters=32,
             kernel_size=(3, 3, 3),
+            padding='same',
             activation='relu'
         )(self.conv_layer2)
 
@@ -238,40 +236,38 @@ class HybridSpectralNetCustom:
             activation='softmax'
         )(self.dense_layer2)
 
-        self.model = Model(inputs=[self.input_coords, self.img], outputs=self.output_layer)
+        self.model = Model(inputs=self.input_layer, outputs=self.output_layer)
         self.adam = Adam(lr=0.001, decay=1e-06)
         self.model.compile(loss='categorical_crossentropy', optimizer=self.adam, metrics=['accuracy'])
         self.model.summary()
+        abspath = os.path.abspath('.')
+        self.filepath = os.path.abspath(os.path.join(abspath,filepath))
+        checkpoint = ModelCheckpoint(self.filepath, monitor='accuracy', verbose=1, save_best_only=True, mode='max')
+        self.callbacks_list = [checkpoint]
 
     def load_weights(self, filepath):
         self.filepath = filepath
         self.model = load_model(filepath)
         self.model.compile(loss='categorical_crossentropy', optimizer=self.adam, metrics=['accuracy'])
 
-    def fit(self, X, y, lookup_img, batch_size=256, epochs=100, filepath='best_model.hdf5'):
-        """
-        X: pixel coordinates
-        y: pixel labels
-        lookup_img: image from which image cubes will be retrieved
-        """
-        abspath = os.path.abspath('.')
-        self.filepath = os.path.abspath(os.path.join(abspath,filepath))
+    def fit(self, X, y, batch_size=256, epochs=100):
+        # transform matrices to correct format
+        self.num_bands = X.shape[-1]
         self.X = X.reshape(
             -1,
-            2
+            self.height,
+            self.width,
+            self.num_bands,
+            1
         )
-        self.y = np_utils.to_categorical(y)
+        self.y = np_utils.to_categorical(y, num_classes=self.output_units)
 
-        checkpoint = ModelCheckpoint(self.filepath, monitor='accuracy', verbose=1, save_best_only=True, mode='max')
-        self.callbacks_list = [checkpoint]
         self.history = self.model.fit(
-            x=[self.X, lookup_img],
+            x=self.X,
             y=self.y,
             batch_size=batch_size,
             epochs=epochs,
-            callbacks=self.callbacks_list,
-            workers=0,
-            use_multiprocessing=True
+            callbacks=self.callbacks_list
         )
 
     def predict(self, X, filepath=None):

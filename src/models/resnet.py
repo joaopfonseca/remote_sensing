@@ -32,8 +32,8 @@ class ResNet50:
             )
         )
 
-        self.base_model = resnet.ResNet50(weights= None, include_top=False, input_shape= input_shape)(self.input_layer)
-        self.flatten_layer = Flatten()(self.base_model)
+        self.base_model = resnet.ResNet50(weights='imagenet', include_top=False, input_shape= input_shape)(self.input_layer)
+        self.flatten_layer = Flatten()(self.base_model.output)
 
         ########################################################################
         # fully connected layers

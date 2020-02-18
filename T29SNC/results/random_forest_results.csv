@@ -1,0 +1,2 @@
+models,params,mean_fit_time,mean_test_accuracy,mean_test_f1_macro,mean_test_geoometric_mean_macro
+RFC,{'RFC__random_state': 2357136044},3642.927530002594,0.7248383305343711,0.6505219837823022,0.7605390894314269
