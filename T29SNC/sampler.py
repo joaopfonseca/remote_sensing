@@ -10,11 +10,11 @@ from affine import Affine
 from src.preprocess.readers import SentinelProductReader
 #from sklearn.model_selection import train_test_split
 
-BANDS_PATH = 'T29SNC/organized_images/'
-TILES_SHAPEFILE = 'T29SNC/shapefiles/s2tilesPT/sentinel2_tiles.shp'
-LABELS_SHAPEFILE15 = 'T29SNC/COS2015/cos15_merged_29SNC_UTMZ29N.shp'
-LABELS_SHAPEFILE18 = 'T29SNC/COS2018/COS2018v1.shp'
-CSV_SAVE_PATH = 'T29SNC/sampled_data_features/'
+BANDS_PATH = 'T29SNC/data/organized_images/'
+TILES_SHAPEFILE = 'T29SNC/data/shapefiles/s2tilesPT/sentinel2_tiles.shp'
+LABELS_SHAPEFILE15 = 'T29SNC/data/COS2015/cos15_merged_29SNC_UTMZ29N.shp'
+LABELS_SHAPEFILE18 = 'T29SNC/data/COS2018/COS2018v1.shp'
+CSV_SAVE_PATH = 'T29SNC/data/sampled_data_features/'
 random_state = 0
 
 ## retrieve tile boundaries and crs

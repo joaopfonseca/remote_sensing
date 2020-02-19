@@ -71,7 +71,7 @@ classifiers = [
     ('RFC', RandomForestClassifier(n_estimators=100), {})
 ]
 
-SCORERS['geoometric_mean_macro'] = make_scorer(
+SCORERS['geometric_mean_macro'] = make_scorer(
     lambda y_true, y_pred: geometric_mean_score(y_true, y_pred, average='macro')
 )
 
@@ -87,7 +87,7 @@ cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=random_state)
 model_search = ModelSearchCV(
     pipelines,
     param_grid,
-    scoring=['accuracy', 'f1_macro', 'geoometric_mean_macro'],
+    scoring=['accuracy', 'f1_macro', 'geometric_mean_macro'],
     refit='accuracy',
     n_jobs=-1,
     cv=cv,
