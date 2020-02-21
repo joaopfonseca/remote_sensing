@@ -4,10 +4,10 @@ import pandas as pd
 import datetime as dt
 
 ## configs
-DATA_DIR = 'T29SNC/sampled_data_features'
+DATA_DIR = 'T29SNC/data/sampled_data_features'
 MONTH = 2
 END_YEAR = 2019
-SAVE_DIR = 'T29SNC/'
+SAVE_DIR = 'T29SNC/data/preprocessed/'
 
 # get date range
 start_date = dt.datetime(month=MONTH+1, year=END_YEAR-1, day=1)\
@@ -53,14 +53,24 @@ bands = set([
 
 df = df.sort_index(1)
 for band in bands:
-    cols_to_interpolate = df.columns.str.endswith(band)
-    df.loc[:,cols_to_interpolate] = df.loc[:,cols_to_interpolate]\
+    band_cols = df.columns[df.columns.str.endswith(band)]
+    df[f'{band}_var'] = df.loc[:,band_cols].var(1, skipna=True)
+    df[f'{band}_q10'] = df.loc[:,band_cols].quantile(0.1, axis=1)
+    df[f'{band}_q25'] = df.loc[:,band_cols].quantile(0.25, axis=1)
+    df[f'{band}_q50'] = df.loc[:,band_cols].quantile(0.5, axis=1)
+    df[f'{band}_q75'] = df.loc[:,band_cols].quantile(0.75, axis=1)
+    df[f'{band}_q90'] = df.loc[:,band_cols].quantile(0.9, axis=1)
+    df[f'{band}_q75_25'] = df[f'{band}_q75'] - df[f'{band}_q25']
+    df[f'{band}_q90_10'] = df[f'{band}_q90'] - df[f'{band}_q10']
+
+    df.loc[:,band_cols] = df.loc[:,band_cols]\
         .interpolate(method='linear', axis=1, limit=2, limit_direction='both', limit_area=None)
+
 
 # drop cloud mask columns
 df = df[df.columns[~df.columns.str.endswith('SCL')]]
 
 if MONTH >= 10:
-    df.to_csv(SAVE_DIR+f'{END_YEAR}_{MONTH}', index=False)
+    df.to_csv(SAVE_DIR+f'{END_YEAR}_{MONTH}.csv', index=False)
 else:
-    df.to_csv(SAVE_DIR+f'{END_YEAR}_0{MONTH}', index=False)
+    df.to_csv(SAVE_DIR+f'{END_YEAR}_0{MONTH}.csv', index=False)

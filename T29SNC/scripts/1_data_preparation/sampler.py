@@ -15,7 +15,7 @@ TILES_SHAPEFILE = 'T29SNC/data/shapefiles/s2tilesPT/sentinel2_tiles.shp'
 LABELS_SHAPEFILE15 = 'T29SNC/data/COS2015/cos15_merged_29SNC_UTMZ29N.shp'
 LABELS_SHAPEFILE18 = 'T29SNC/data/COS2018/COS2018v1.shp'
 CSV_SAVE_PATH = 'T29SNC/data/sampled_data_features/'
-random_state = 0
+random_state = 1
 
 ## retrieve tile boundaries and crs
 gdf_tiles = gpd.read_file(TILES_SHAPEFILE)
@@ -26,7 +26,7 @@ del gdf_tiles #, tile_shape
 
 # get shapefiles
 gdf_cos15 = gpd.read_file(LABELS_SHAPEFILE15)
-gdf_cos18 = gpd.read_file(LABELS_SHAPEFILE18)
+gdf_cos18 = gpd.read_file(LABELS_SHAPEFILE18).to_crs(gdf_cos15.crs['init'])
 
 # rasterize COS
 labels = {v:i for i, v in enumerate(gdf_cos15['Megaclasse'].unique())}
@@ -102,10 +102,37 @@ df_coords_sampled = df_coords.groupby('class')\
     .drop(columns='class1')\
     .reset_index(drop=True)
 
-
 # create mask
 mask = np.zeros(raster.shape)*np.nan
 np.apply_along_axis(lambda idx: mask.itemset(tuple(idx),1), 1, df_coords_sampled[['y','x']].values)
+
+
+# get cos2018 labels
+labels2 = {v:i for i, v in enumerate(gdf_cos18['COS2018_n1'].unique())}
+#pickle.dump(labels2, open('T29SNC/labels_dict_cos18.pkl','wb'))
+shapes = [
+    (geom, value)
+    for geom, value
+    in zip(gdf_cos18['geometry'], gdf_cos18['COS2018_n1'].map(labels2))
+]
+raster = features.rasterize(
+    shapes=shapes,
+    out_shape=out_shape,
+    fill=-1,
+    transform=transf,
+    all_touched=False,
+    default_value=1,
+    dtype='int32',
+)
+y_18 = raster*mask
+columns = ['y', 'x', 'class18']
+coords = np.indices(y_18.shape)
+data = np.concatenate([
+    coords,np.expand_dims(y_18,0)
+]).reshape((len(columns), np.prod(y_18.shape)))
+pixel_labels18 = pd.DataFrame(data=data.T, columns=columns).dropna(subset=['class18'])
+pixel_labels18.to_csv(CSV_SAVE_PATH+'cos2018_labels.csv')
+
 
 for date in os.listdir(BANDS_PATH):
     if os.path.isdir(os.path.join(BANDS_PATH, date)):

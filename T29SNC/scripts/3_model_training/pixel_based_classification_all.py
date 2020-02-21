@@ -27,7 +27,6 @@ df = pd.read_csv(DATA_PATH)
 df = df.dropna()
 
 # split by feature type
-# split by feature type
 df_meta = df[['x','y','Megaclasse']]
 df_bands = df.drop(columns=df_meta.columns)
 
