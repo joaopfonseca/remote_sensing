@@ -62,7 +62,6 @@ for band in bands:
     df[f'{band}_q90'] = df.loc[:,band_cols].quantile(0.9, axis=1)
     df[f'{band}_q75_25'] = df[f'{band}_q75'] - df[f'{band}_q25']
     df[f'{band}_q90_10'] = df[f'{band}_q90'] - df[f'{band}_q10']
-
     df.loc[:,band_cols] = df.loc[:,band_cols]\
         .interpolate(method='linear', axis=1, limit=2, limit_direction='both', limit_area=None)
 

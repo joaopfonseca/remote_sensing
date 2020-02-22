@@ -6,12 +6,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectFromModel
 from scipy.stats import spearmanr, pearsonr
 from sklearn.base import BaseEstimator, MetaEstimatorMixin
+from sklearn.feature_selection.base import SelectorMixin
 from sklearn.model_selection import train_test_split
 
 from rfpimp import importances as permutation_importances
 
 
-class PermutationRF(BaseEstimator, MetaEstimatorMixin):
+class PermutationRF(BaseEstimator, SelectorMixin, MetaEstimatorMixin):
     def __init__(self, n_estimators=100, test_size=.2, max_features=None, n_jobs=-1, random_state=None):
         super().__init__()
         self.n_estimators = n_estimators
@@ -23,7 +24,6 @@ class PermutationRF(BaseEstimator, MetaEstimatorMixin):
             random_state=self.random_state)
 
     def fit(self, X, y):
-
         X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=self.test_size, random_state=self.random_state)
         self.model.fit(X_tr,y_tr)
         self.permutation_importances_ = permutation_importances(
@@ -33,7 +33,7 @@ class PermutationRF(BaseEstimator, MetaEstimatorMixin):
         )
         return self
 
-    def transform(self, X, y):
+    def transform(self, X, y=None):
         if self.max_features:
             col_ids = self.permutation_importances_\
                 .iloc[:self.max_features]\
@@ -45,21 +45,23 @@ class PermutationRF(BaseEstimator, MetaEstimatorMixin):
                 [self.permutation_importances_['Importance']>0]\
                 .astype(int)
 
-        return X[:,col_ids], y
+        return X[:,col_ids]
 
     def fit_transform(self, X, y):
         self.fit(X, y)
         return self.transform(X,y)
 
+    def _get_support_mask(self):
+        return None
 
 
-class CorrelationBasedFeatureSelection(BaseEstimator, MetaEstimatorMixin):
+class CorrelationBasedFeatureSelection(BaseEstimator, SelectorMixin, MetaEstimatorMixin):
     def __init__(self, corr_type='pearson', threshold=.6):
         super().__init__()
         self.corr_type = corr_type
         self.threshold = threshold
 
-    def fit(self, X, y=None):
+    def fit(self, X, y):
         corr = pd.DataFrame(X).corr(self.corr_type).abs()
         corr_tril = pd.DataFrame(np.tril(corr, -1))
         unstacked = corr_tril.unstack().reset_index()
@@ -67,11 +69,11 @@ class CorrelationBasedFeatureSelection(BaseEstimator, MetaEstimatorMixin):
         return self
 
     def transform(self, X, y=None):
-        if y is None:
-            return np.delete(X, self.dropped_features_, axis=1), y
-        else:
-            return np.delete(X, self.dropped_features_, axis=1)
+        return np.delete(X, self.dropped_features_, axis=1)
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X, y):
         self.fit(X, y)
         return self.transform(X,y)
+
+    def _get_support_mask(self):
+        return None

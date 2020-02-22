@@ -140,7 +140,7 @@ X = df_bands.values
 y = df_meta['Megaclasse'].values
 
 # sample data
-X, _, y, _ = train_test_split(X, y, train_size=.01, shuffle=True, stratify=y, random_state=random_state)
+X, _, y, _ = train_test_split(X, y, train_size=.1, shuffle=True, stratify=y, random_state=random_state)
 
 
 
