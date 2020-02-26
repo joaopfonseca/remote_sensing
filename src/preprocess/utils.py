@@ -6,6 +6,30 @@ TODO:
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
+from sklearn.base import BaseEstimator, MetaEstimatorMixin
+from sklearn.feature_selection.base import SelectorMixin
+
+class SelectFeaturesFromList(BaseEstimator, MetaEstimatorMixin, SelectorMixin):
+    def __init__(self, feature_rankings=None, n_features=None):
+        """
+        Used to determine the optimal number of features to keep
+        feature_rankings: List or array with an importance rank for each feature
+        """
+        self.feature_rankings = feature_rankings
+        self.n_features = n_features
+
+    def fit(self, X, y):
+        return self
+
+    def transform(self, X, y=None):
+        return X[:, self.feature_rankings<self.n_features]
+
+    def fit_transform(self, X, y):
+        return self.transform(X, y)
+
+    def _get_support_mask(self):
+        return None
+
 
 def ZScoreNormalization(X, axes=(0,1), scorer=None):
     """Applies Z-Score Normalization over a multispectral image"""

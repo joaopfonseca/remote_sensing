@@ -24,9 +24,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from __future__ import print_function
 import numpy as np
 from sklearn.neighbors import KDTree
-from imblearn.under_sampling.base import BaseCleaningSampler
+from sklearn.base import BaseEstimator, MetaEstimatorMixin
+from sklearn.feature_selection.base import SelectorMixin
 
-class ReliefF(BaseCleaningSampler):
+class ReliefF(BaseEstimator, SelectorMixin, MetaEstimatorMixin):
 
     """Feature selection using data-mined expert knowledge.
 
@@ -93,8 +94,9 @@ class ReliefF(BaseCleaningSampler):
                     self.feature_scores[similar_features] -= 1.
 
         self.top_features = np.argsort(self.feature_scores)[::-1]
+        return self
 
-    def resample(self, X, y):
+    def transform(self, X, y=None):
         """Reduces the feature set down to the top `n_features_to_keep` features.
 
         Parameters
@@ -108,8 +110,11 @@ class ReliefF(BaseCleaningSampler):
             Reduced feature matrix
 
         """
-        return X[:, self.top_features[self.n_features_to_keep]]
+        return X[:, self.top_features[:self.n_features_to_keep]]
 
-    def _fit_resample(self, X, y):
+    def fit_transform(self, X, y):
         self.fit(X, y)
-        return self.resample(X, y)
+        return self.transform(X, y)
+
+    def _get_support_mask(self):
+        return None

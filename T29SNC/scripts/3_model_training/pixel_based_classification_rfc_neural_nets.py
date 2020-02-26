@@ -18,7 +18,7 @@ from src.models.recurrent import LSTMNet
 
 # configs
 random_state = 0
-DATA_PATH = 'T29SNC/data/preprocessed/2019_02.csv'
+DATA_PATH = 'T29SNC/data/preprocessed/2019_02_RS_0.csv'
 MODELS_PATH = 'T29SNC/models/'
 RESULTS_PATH = 'T29SNC/results/'
 

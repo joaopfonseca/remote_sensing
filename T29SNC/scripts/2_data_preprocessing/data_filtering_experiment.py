@@ -17,14 +17,6 @@ from sklearn.model_selection import StratifiedKFold, train_test_split
 # data normalization
 from sklearn.preprocessing import StandardScaler
 
-# feature selection
-from sklearn.feature_selection import SelectFromModel
-from src.preprocess.feature_selection import (
-    CorrelationBasedFeatureSelection,
-    PermutationRF,
-)
-from src.preprocess.relieff import ReliefF
-
 # data filtering
 from sklearn.ensemble import IsolationForest
 from src.preprocess.data_selection import (
@@ -48,7 +40,7 @@ from sklearn.metrics import SCORERS, make_scorer
 from imblearn.metrics import geometric_mean_score
 
 ## configs
-DATA_PATH = 'T29SNC/data/preprocessed/2019_02_RS_0.csv'
+DATA_PATH = 'T29SNC/data/preprocessed/2019_02_RS_0_n_features_320.csv'
 RESULTS_PATH = 'T29SNC/results/'
 random_state=0
 
@@ -71,28 +63,6 @@ anomally_filters = [
 ]
 
 ## set up experiment objects
-feature_selection = [
-    ('NONE', None, {}),
-    ('CorrelationBased', CorrelationBasedFeatureSelection(), {
-            'corr_type':['pearson'], 'threshold':[.7, .8, .9]
-        }
-    ),
-    ('Permutation', PermutationRF(), {'n_estimators': [100], 'max_features': [None, 30, 50, 70]}),
-    ('RFGini', SelectFromModel(
-        estimator=RandomForestClassifier(n_estimators=100, criterion='gini', random_state=0),
-        prefit=False), {
-            'max_features': [15, 30, 40, 50, 60, 70]
-        }
-    ),
-    ('RFEntropy', SelectFromModel(
-        estimator=RandomForestClassifier(n_estimators=100, criterion='entropy', random_state=0),
-        prefit=False), {
-            'max_features': [15, 30, 40, 50, 60, 70]
-        }
-    ),
-    ('ReliefF', ReliefF(), {'n_neighbors': [40, 100], 'n_features_to_keep': [15, 30, 40, 50, 60, 70]})
-]
-
 anomally_detection = [
     ('NONE', None, {}),
     ('Single', SingleFilter(), {'n_splits':[3,4,5,6,7,8]}),
@@ -143,32 +113,7 @@ y = df_meta['Megaclasse'].values
 X, _, y, _ = train_test_split(X, y, train_size=.1, shuffle=True, stratify=y, random_state=random_state)
 
 
-
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
-
-## Experiment 1 (feature selection)
-pipelines_feature, param_grid_feature = check_pipelines(
-    [feature_selection, classifiers_1],
-    random_state=0,
-    n_runs=1
-)
-
-model_search_feature = ModelSearchCV(
-    pipelines_feature,
-    param_grid_feature,
-    scoring=scorers,
-    refit='accuracy',
-    n_jobs=-1,
-    cv=cv,
-    verbose=1
-)
-model_search_feature.fit(X,y)
-
-df_results_feature = report_model_search_results(model_search_feature)\
-    .sort_values('mean_test_score', ascending=False)
-df_results_feature.to_csv('results_feature_selection.csv')
-pickle.dump(model_search_feature, open('model_search_feature_selection.pkl','wb'))
-
 
 ## Experiment 2 (anomally detection)
 pipelines_anomally, param_grid_anomally = check_pipelines(
