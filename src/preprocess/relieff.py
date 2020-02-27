@@ -70,7 +70,7 @@ class ReliefF(BaseEstimator, SelectorMixin, MetaEstimatorMixin):
 
         Returns
         -------
-        None
+        self
 
         """
         self.feature_scores = np.zeros(X.shape[1])
