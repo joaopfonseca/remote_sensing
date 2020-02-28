@@ -27,16 +27,19 @@ from imblearn.metrics import geometric_mean_score
 
 # configs
 random_state = 0
-DATA_DIR = 'T29SNC/data/preprocessed/_______'
-
+DATA_DIR = 'T29SNC/data/preprocessed/2019_02_RS_0_n_features_320.csv'
+FEATURE_RANK_PATH = 'T29SNC/results/feature_rankings.csv'
 
 # read data
-df = pd.read_csv(DATA_DIR)
-df = df.dropna()
+df = pd.read_csv(DATA_DIR).dropna()
 
 # split by feature type
 df_meta = df[['x','y','Megaclasse']]
-df_bands = df.drop(columns=df_meta.columns)
+
+# drop least important features
+features = pd.read_csv(FEATURE_RANK_PATH).iloc[:70,0]
+df_bands = df[features.to_list()]
+
 
 # normalize
 znorm = StandardScaler()
@@ -44,7 +47,7 @@ df_bands = pd.DataFrame(znorm.fit_transform(df_bands.values), columns=df_bands.c
 
 # get data in simple format
 X = df_bands.values
-y = df_meta.Megaclasse.values.astype(int)
+y = df_meta['Megaclasse'].values
 
 months = np.array([c.split('_')[1]  for c in df_bands.columns])
 months[months=='12'] = '00'

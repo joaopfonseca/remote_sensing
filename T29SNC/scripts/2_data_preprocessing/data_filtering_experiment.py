@@ -42,6 +42,7 @@ from imblearn.metrics import geometric_mean_score
 ## configs
 DATA_PATH = 'T29SNC/data/preprocessed/2019_02_RS_0_n_features_320.csv'
 RESULTS_PATH = 'T29SNC/results/'
+FEATURE_RANK_PATH = RESULTS_PATH+'feature_rankings.csv'
 random_state=0
 
 ## set up classifiers used as filters in anomally detection step
@@ -100,7 +101,10 @@ df = pd.read_csv(DATA_PATH).dropna()
 
 # split by feature type
 df_meta = df[['x','y','Megaclasse']]
-df_bands = df.drop(columns=df_meta.columns)
+
+# drop least important features
+features = pd.read_csv(FEATURE_RANK_PATH).iloc[:70,0]
+df_bands = df[features.to_list()]
 
 # normalize
 znorm = StandardScaler()

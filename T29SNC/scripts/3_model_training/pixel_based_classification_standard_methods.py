@@ -24,6 +24,7 @@ random_state = 0
 DATA_PATH = 'T29SNC/data/preprocessed/2019_02_RS_0.csv'
 MODELS_PATH = 'T29SNC/models/'
 RESULTS_PATH = 'T29SNC/results/'
+FEATURE_RANK_PATH = RESULTS_PATH+'feature_rankings.csv'
 
 # read data
 df = pd.read_csv(DATA_PATH)
@@ -31,11 +32,10 @@ df = df.dropna()
 
 # split by feature type
 df_meta = df[['x','y','Megaclasse']]
-df_bands = df.drop(columns=df_meta.columns)
 
 # drop least important features
-
-## TODO
+features = pd.read_csv(FEATURE_RANK_PATH).iloc[:70,0]
+df_bands = df[features.to_list()]
 
 # normalize
 znorm = StandardScaler()
