@@ -132,6 +132,7 @@ model_search_anomally = ModelSearchCV(
     pipelines_anomally,
     param_grid_anomally,
     scoring=scorers,
+    refit='accuracy',
     n_jobs=-1,
     cv=cv,
     verbose=1
