@@ -155,3 +155,8 @@ model_search_dimreduct = ModelSearchCV(
 )
 
 model_search_dimreduct.fit(X,y)
+
+df_results_dimreduct = report_model_search_results(model_search_dimreduct)\
+    .sort_values('mean_test_accuracy', ascending=False)
+df_results_dimreduct.to_csv(RESULTS_PATH+'results_dimreduct.csv')
+pickle.dump(model_search_dimreduct, open(RESULTS_PATH+'model_search_dimreduct.pkl','wb'))

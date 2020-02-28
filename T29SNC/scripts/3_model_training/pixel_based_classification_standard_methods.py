@@ -11,10 +11,13 @@ from src.reporting.reports import reports
 from sklearn.preprocessing import StandardScaler
 
 # classifiers
-from sklearn.ensemble import RandomForestClassifier
-from src.models.HybridSpectralNet import PixelBasedHybridSpectralNet
-from src.models.resnet import ResNet50
-from src.models.recurrent import LSTMNet
+# classifiers
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    AdaBoostClassifier,
+    GradientBoostingClassifier
+)
+from sklearn.linear_model import LogisticRegression
 
 # configs
 random_state = 0
@@ -30,6 +33,10 @@ df = df.dropna()
 df_meta = df[['x','y','Megaclasse']]
 df_bands = df.drop(columns=df_meta.columns)
 
+# drop least important features
+
+## TODO
+
 # normalize
 znorm = StandardScaler()
 df_bands = pd.DataFrame(znorm.fit_transform(df_bands.values), columns=df_bands.columns, index=df_bands.index)
@@ -43,8 +50,21 @@ months[months=='12'] = '00'
 bands  = np.array([c.split('_')[-1] for c in df_bands.columns])
 order = np.argsort(np.array([f'{m}_{b}' for m,b in zip(months, bands)]))
 
+# get optimal parameters found from previous experiment
+
+## TODO
+
 # set up experiments
 ## Random Forest
 rfc = RandomForestClassifier(n_estimators=100, random_state=random_state)
 rfc.fit(X, y)
 pickle.dump(rfc, open(MODELS_PATH+'random_forest_.pkl','wb'))
+
+## AdaBoost
+AdaBoostClassifier()
+
+## GBC
+GradientBoostingClassifier()
+
+## LR
+LogisticRegression()
