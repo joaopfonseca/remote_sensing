@@ -29,6 +29,7 @@ from imblearn.metrics import geometric_mean_score
 random_state = 0
 DATA_DIR = 'T29SNC/data/preprocessed/2019_02_RS_0_n_features_320.csv'
 FEATURE_RANK_PATH = 'T29SNC/results/feature_rankings.csv'
+n_features = 70
 
 # read data
 df = pd.read_csv(DATA_DIR).dropna()
@@ -37,7 +38,7 @@ df = pd.read_csv(DATA_DIR).dropna()
 df_meta = df[['x','y','Megaclasse']]
 
 # drop least important features
-features = pd.read_csv(FEATURE_RANK_PATH).iloc[:70,0]
+features = pd.read_csv(FEATURE_RANK_PATH).iloc[:n_features,0]
 df_bands = df[features.to_list()]
 
 
@@ -99,6 +100,6 @@ model_search = ModelSearchCV(
 )
 model_search.fit(X,y)
 
-pickle.dump(model_search, open('classifier_search_.pkl','wb'))
+pickle.dump(model_search, open(f'classifier_search_{n_features}_features.pkl','wb'))
 df_results_feature = report_model_search_results(model_search)\
-    .sort_values('mean_test_score', ascending=False)
+    .sort_values('mean_test_accuracy', ascending=False)
