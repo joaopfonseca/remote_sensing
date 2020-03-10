@@ -1,0 +1,7 @@
+Method,Accuracy,F-score,G-mean,n_features
+CorrelationBased,0.665,0.569,0.706,nan
+None,0.674,0.578,0.713,nan
+Permutation,0.673,0.579,0.713,nan
+RFEntropy,0.673,0.580,0.715,70.000
+RFGini,0.671,0.576,0.712,nan
+ReliefF,0.679,0.580,0.715,70.000

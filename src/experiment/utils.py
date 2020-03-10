@@ -88,3 +88,6 @@ def check_fit_params(fit_params):
         for param_name, fit_param in dict(fit_p_dict).items():
             _fit_params[f'{model_name}__{param_name}'] = fit_param
     return _fit_params
+
+def geometric_mean_macro(X, y):
+    return geometric_mean_score(X, y, average='macro')
