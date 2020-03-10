@@ -2,6 +2,8 @@
 import pandas as pd
 import numpy as np
 import geopandas as gpd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 import pickle
 import ast
@@ -75,8 +77,8 @@ dimreduct_scores.to_csv(ANALYSIS_PATH+'dimreduct_scores.csv')
 # Land Cover Change confusion matrix
 cos_changes = pickle.load(open(RESULTS_PATH+'cos_changes_y_true_18_y_pred_15.pkl', 'rb'))
 labels = {v:k.split('.')[-1].strip() for k,v in pickle.load(open('T29SNC/labels_dict_cos18.pkl','rb')).items()}
-mapper_cols = dict([(k,labels[k]) if k in labels else (k,k) for k in cm.columns])
-mapper_index = dict([(k,labels[k]) if k in labels else (k,k) for k in cm.index])
+mapper_cols = dict([(k,labels[k]) if k in labels else (k,k) for k in cos_changes[1].columns])
+mapper_index = dict([(k,labels[k]) if k in labels else (k,k) for k in cos_changes[1].index])
 cm = cos_changes[1].rename(columns=mapper_cols, index=mapper_index)
 cm.iloc[-1,-1] = cos_changes[-1]['Score'].map('{:,.3f}'.format)['ACCURACY']
 cm.to_csv(ANALYSIS_PATH+'land_cover_change_2015_2018.csv')
@@ -119,3 +121,26 @@ df_dimreduct = pd.read_csv(RESULTS_PATH+'results_dimreduct.csv').rename(columns=
 df_dimreduct['n_features'] = df_dimreduct['params'].apply(
     lambda x: ast.literal_eval(x)['DimReduct__n_features']
 )
+
+sns.set()
+sns.lineplot(
+    x='Number of Features',
+    y='Score',
+    hue='Metric',
+    style='Metric',
+    data=df_dimreduct[['n_features', 'Accuracy', 'F-score', 'G-mean']]\
+        .rename(columns={'n_features': 'Number of Features'})\
+        .melt('Number of Features')\
+        .rename(columns={'value':'Score', 'variable':'Metric'})
+).get_figure().savefig(ANALYSIS_PATH+'n_features_scores.png', dpi=360)
+plt.clf()
+
+sns.set(style='darkgrid')
+plt.figure(figsize=(10,5))
+plt.ylabel('Normalized Feature Importance')
+plt.xlabel('Features')
+plt.subplots_adjust(left=.07, bottom=.35, right=.98, top=.98)
+pd.concat([feature_rankings.iloc[:10], feature_rankings.iloc[-10:]])\
+    .set_index('feature')['norm_score'].plot.bar().get_figure()\
+    .savefig(ANALYSIS_PATH+'top_bottom_10_features_scores.png', dpi=360)
+plt.clf()
