@@ -15,6 +15,7 @@ from rlearn.tools.reporting import report_model_search_results
 # configs
 RESULTS_PATH = 'T29SNC/results/'
 ANALYSIS_PATH = 'T29SNC/analysis/'
+DATA_FILE = 'T29SNC/data/preprocessed/2019_02_RS_0_n_features_320.csv'
 
 # Get feature importance rankings
 model_search_feature_selection = pickle.load(
@@ -144,3 +145,24 @@ pd.concat([feature_rankings.iloc[:10], feature_rankings.iloc[-10:]])\
     .set_index('feature')['norm_score'].plot.bar().get_figure()\
     .savefig(ANALYSIS_PATH+'top_bottom_10_features_scores.png', dpi=360)
 plt.clf()
+
+df = pd.read_csv(DATA_FILE)
+df['Megaclasse'] = df['Megaclasse'].map(labels)
+
+# plot most important feature
+plt.figure(figsize=(14,7))
+for c in df['Megaclasse'].unique():
+    feature = feature_rankings.iloc[0]['feature']
+    col = StandardScaler().fit_transform(df[feature].values.reshape(-1, 1))
+    sns.distplot(pd.Series(col[df['Megaclasse']==c].squeeze(), name=feature), label=c, hist=False, kde_kws={'shade': True})
+plt.xlim(2*-1.96, 2*1.96)
+plt.savefig(ANALYSIS_PATH+'top_feature_dist.png', dpi=360)
+
+# plot least important feature
+plt.figure(figsize=(14,7))
+for c in df['Megaclasse'].unique():
+    feature = feature_rankings.iloc[-1]['feature']
+    col = StandardScaler().fit_transform(df[feature].values.reshape(-1, 1))
+    sns.distplot(pd.Series(col[df['Megaclasse']==c].squeeze(), name=feature), label=c, hist=False, kde_kws={'shade': True})
+plt.xlim(2*-1.96, 2*1.96)
+plt.savefig(ANALYSIS_PATH+'bottom_feature_dist.png', dpi=360)
