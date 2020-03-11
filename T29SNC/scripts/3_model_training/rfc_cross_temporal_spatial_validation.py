@@ -24,7 +24,7 @@ from sklearn.linear_model import LogisticRegression
 
 # configs
 random_state = 0
-DATA_PATH = 'T29SNC/data/preprocessed/2019_02_RS_0.csv'
+DATA_PATH = 'T29SNC/data/preprocessed/2019_02_RS_0_n_features_320.csv'
 MODELS_PATH = 'T29SNC/models/'
 RESULTS_PATH = 'T29SNC/results/'
 FEATURE_RANK_PATH = RESULTS_PATH+'feature_rankings.csv'
