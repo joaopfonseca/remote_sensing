@@ -20,13 +20,7 @@ from sklearn.preprocessing import StandardScaler
 # data filtering
 from sklearn.ensemble import IsolationForest
 from src.preprocess.data_selection import (
-    SingleFilter,
-    ConsensusFilter,
-    MajorityVoteFilter,
-    MBKMeansFilter,
-    MBKMeansFilter_reversed,
-    PerClassiForest,
-    ParisDataFiltering
+    MBKMeansFilter_reversed
 )
 
 # classifiers
@@ -61,15 +55,15 @@ anomally_detection = [
     ('NONE', None, {}),
     ('OwnMethod2', MBKMeansFilter_reversed(),
             {
-            'n_splits':[3,4,5], 'granularity':[.5,1,1.5,2,3,4,5],
-            'method':['obs_percent', 'mislabel_rate'],
-            'threshold':[.85,.9,.93,.96,.97,.98,.99]
+            'n_splits':[3,4,5], 'granularity':[.1,.25,.5,.75,1],
+            'method':['obs_percent'],
+            'threshold':[.9,.93,.96,.97,.98,.99]
             }),
 ]
 
 classifiers_1 = [
     ('RFC', RandomForestClassifier(), {
-        'n_estimators':[50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
+        'n_estimators':[100, 300, 500, 700, 900, 1100],
         'criterion': ['entropy', 'gini']
         })
 ]
@@ -97,6 +91,9 @@ df_bands = pd.DataFrame(znorm.fit_transform(df_bands.values), columns=df_bands.c
 
 X = df_bands.values
 y = df_meta['Megaclasse'].values
+
+# sample data
+X, _, y, _ = train_test_split(X, y, train_size=.3, shuffle=True, stratify=y, random_state=random_state)
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
 
