@@ -1,8 +1,12 @@
 # etc
+*/results/*.pkl
+*/results/*.csv
+*/models/*.pkl
+
 *.zip
 images/
 organized_images/
-T29SNC/data/
+*/data/
 
 # shapefiles
 *.dbf
