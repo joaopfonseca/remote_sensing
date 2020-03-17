@@ -223,7 +223,7 @@ class SentinelProductReader(ProductReader):
         self.X_labels   = []
 
         if bands_path and type(bands)==list:
-            self.bands = bands
+            self.bands = [band for band in os.listdir(bands_path) if band.split('_')[-2] in bands]
         elif bands_path and not bands:
             self.bands = os.listdir(bands_path)
 
