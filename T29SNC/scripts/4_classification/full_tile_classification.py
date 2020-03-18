@@ -114,98 +114,96 @@ bands_all_months = feats[feats.apply(lambda x: x.startswith('B'))]\
 bands_all_months += ['SCL']
 bands_all_months = list(set(bands_all_months))
 
-for i, mask in enumerate(masks):
-    print(f'Tile {i+1}/25')
-    # get data
-    df = pd.DataFrame()
-    for year, month in date_range:
-        date = [path for path in os.listdir(BANDS_PATH) if path.startswith(f'{year}_{month}')][0]
-        feat_subset = feats[feats.apply(lambda x: len(x.split('_'))<=2)]
-        feat_subset = feats[feats.str.startswith(month)]\
-            .apply(lambda x: x.split('_')[-1]).to_list()
-        if 'NDVI' in feat_subset: feat_subset += ['B08', 'B04']
-        if 'NDBI' in feat_subset: feat_subset += ['B11', 'B08']
-        if 'NDMI' in feat_subset: feat_subset += ['B08', 'B11']
-        if 'NDWI' in feat_subset: feat_subset += ['B08', 'B12']
-        feat_subset = list(set(feat_subset + bands_all_months))
 
-        if os.path.isdir(os.path.join(BANDS_PATH, date)):
-            print(f'\t({year}_{month}) Reading image')
-            img = SentinelProductReader(
-                bands_path = BANDS_PATH+f'{date}/',
-                labels_shapefile = LABELS_SHAPEFILE18,
-                label_col = 'COS2018_n1',
-                bands = feat_subset
-            )
-            img.get_X_array()
-            img.get_y_array()
+# get data
+df = pd.DataFrame()
+for year, month in date_range:
+    date = [path for path in os.listdir(BANDS_PATH) if path.startswith(f'{year}_{month}')][0]
+    feat_subset = feats[feats.apply(lambda x: len(x.split('_'))<=2)]
+    feat_subset = feats[feats.str.startswith(month)]\
+        .apply(lambda x: x.split('_')[-1]).to_list()
+    if 'NDVI' in feat_subset: feat_subset += ['B08', 'B04']
+    if 'NDBI' in feat_subset: feat_subset += ['B11', 'B08']
+    if 'NDMI' in feat_subset: feat_subset += ['B08', 'B11']
+    if 'NDWI' in feat_subset: feat_subset += ['B08', 'B12']
+    feat_subset = list(set(feat_subset + bands_all_months))
 
-            print(f'\t({year}_{month}) Applying mask')
-            img.y_array = img.y_array*mask
-            _df = img.to_pandas().dropna(subset=['COS2018_n1'])
-            del img
-            rename_mapper = {c:f"{month}_{c.split('_')[-2]}"
-                for c in _df.drop(columns=['x','y','COS2018_n1']).columns
-            }
-            _df = _df.rename(columns=rename_mapper)
-            index_maker = lambda base, var: (base-var)/(base+var)
-            print(f'\t({year}_{month}) Extracting Indices')
-            if 'NDVI' in feat_subset:
-                _df[f'{month}_NDVI'] = index_maker(base = _df[f'{month}_B08'], var= _df[f'{month}_B04'])
-            if 'NDBI' in feat_subset:
-                _df[f'{month}_NDBI'] = index_maker(base = _df[f'{month}_B11'], var= _df[f'{month}_B08'])
-            if 'NDMI' in feat_subset:
-                _df[f'{month}_NDMI'] = index_maker(base = _df[f'{month}_B08'], var= _df[f'{month}_B11'])
-            if 'NDWI' in feat_subset:
-                _df[f'{month}_NDWI'] = index_maker(base = _df[f'{month}_B08'], var= _df[f'{month}_B12'])
+    if os.path.isdir(os.path.join(BANDS_PATH, date)):
+        print(f'\t({year}_{month}) Reading image')
+        img = SentinelProductReader(
+            bands_path = BANDS_PATH+f'{date}/',
+            labels_shapefile = LABELS_SHAPEFILE18,
+            label_col = 'COS2018_n1',
+            bands = feat_subset
+        )
+        img.get_X_array()
+        img.get_y_array()
 
-            # join dataframes
-            print(f'\t({year}_{month}) Joining Dataframes')
-            cols = _df.columns.difference(df.columns)
-            df = df.join(_df[cols], how='outer')
-            del _df
+        #print(f'\t({year}_{month}) Applying mask')
+        #img.y_array = img.y_array*mask
+        _df = img.to_pandas().dropna(subset=['COS2018_n1'])
+        del img
+        rename_mapper = {c:f"{month}_{c.split('_')[-2]}"
+            for c in _df.drop(columns=['x','y','COS2018_n1']).columns
+        }
+        _df = _df.rename(columns=rename_mapper)
+        index_maker = lambda base, var: (base-var)/(base+var)
+        print(f'\t({year}_{month}) Extracting Indices')
+        if 'NDVI' in feat_subset:
+            _df[f'{month}_NDVI'] = index_maker(base = _df[f'{month}_B08'], var= _df[f'{month}_B04'])
+        if 'NDBI' in feat_subset:
+            _df[f'{month}_NDBI'] = index_maker(base = _df[f'{month}_B11'], var= _df[f'{month}_B08'])
+        if 'NDMI' in feat_subset:
+            _df[f'{month}_NDMI'] = index_maker(base = _df[f'{month}_B08'], var= _df[f'{month}_B11'])
+        if 'NDWI' in feat_subset:
+            _df[f'{month}_NDWI'] = index_maker(base = _df[f'{month}_B08'], var= _df[f'{month}_B12'])
+
+        # join dataframes
+        print(f'\t({year}_{month}) Joining Dataframes')
+        cols = _df.columns.difference(df.columns)
+        df = df.join(_df[cols], how='outer')
+        del _df
 
 
-    # mask clouds
-    print(f'Tile {i+1}/25: Cloud Masking')
-    prefixes = [c.replace('_SCL', '') for c in  df.columns[df.columns.str.endswith('_SCL')]]
-    for prefix in prefixes:
-        df.loc[df[f'{prefix}_SCL'].isin([3,8,9,10]), df.columns.str.startswith(prefix)] = np.nan
+# mask clouds
+print(f'Cloud Masking')
+prefixes = [c.replace('_SCL', '') for c in  df.columns[df.columns.str.endswith('_SCL')]]
+for prefix in prefixes:
+    df.loc[df[f'{prefix}_SCL'].isin([3,8,9,10]), df.columns.str.startswith(prefix)] = np.nan
 
-    df = df.drop(columns=df.columns.str.endswith('_SCL'))
+df = df.drop(columns=df.columns[df.columns.str.endswith('_SCL')])
 
-    # fill missing values
-    print(f'Tile {i+1}/25: Interpolating missing values')
-    bands = set([
-        c.split('_')[-1]
-        for c in df.columns
-        if c.split('_')[-1].startswith('B') or c.split('_')[-1].startswith('ND')
-    ])
+# fill missing values
+print(f'Interpolating missing values')
+bands = set([
+    c.split('_')[-1]
+    for c in df.columns
+    if c.split('_')[-1].startswith('B') or c.split('_')[-1].startswith('ND')
+])
 
-    df = df.sort_index(1)
-    for band in bands:
-        df.loc[:,band_cols] = df.loc[:,band_cols]\
-            .interpolate(method='linear', axis=1, limit=2, limit_direction='both', limit_area=None)
+df = df.sort_index(1)
+for band in bands:
+    band_cols = df.columns[df.columns.str.endswith(band)]
+    df.loc[:,band_cols] = df.loc[:,band_cols]\
+        .interpolate(method='linear', axis=1, limit=2, limit_direction='both', limit_area=None)
 
-    # extract features
-    print(f'Tile {i+1}/25: Extracting year-long features')
-    to_extract = feats[feats.apply(lambda x: x.startswith('B'))].to_list()
-    for quart_range in to_extract:
-        if len(quart_range.split('_'))==2:
-            band, quart = quart_range.split('_')
-            band_cols = df.columns[df.columns.str.endswith(band)]
-            if quart == 'var':
-                df[f'{band}_var'] = df.loc[:,band_cols].var(1, skipna=True)
-            else:
-                df[f'{band}_{quart}'] = df.loc[:,band_cols].quantile(int(quart.replace('q',''))/100, axis=1)
-
+# extract features
+print(f'Extracting year-long features')
+to_extract = feats[feats.apply(lambda x: x.startswith('B'))].to_list()
+for quart_range in to_extract:
+    if len(quart_range.split('_'))==2:
+        band, quart = quart_range.split('_')
+        band_cols = df.columns[df.columns.str.endswith(band)]
+        if quart == 'var':
+            df[f'{band}_var'] = df.loc[:,band_cols].var(1, skipna=True)
         else:
-            band, quart1, quart2 = quart_range.split('_')
-            band_cols = df.columns[df.columns.str.endswith(band)]
-            df[f'{band}_{quart1}_{quart2}'] = (
-                df.loc[:,band_cols].quantile(int(quart1.replace('q',''))/100, axis=1) \
-                - \
-                df.loc[:,band_cols].quantile(int(quart2)/100, axis=1)
-            )
+            df[f'{band}_{quart}'] = df.loc[:,band_cols].quantile(int(quart.replace('q',''))/100, axis=1)
 
-    
+    else:
+        band, quart1, quart2 = quart_range.split('_')
+        band_cols = df.columns[df.columns.str.endswith(band)]
+        df[f'{band}_{quart1}_{quart2}'] = (
+            df.loc[:,band_cols].quantile(int(quart1.replace('q',''))/100, axis=1) \
+            - \
+            df.loc[:,band_cols].quantile(int(quart2)/100, axis=1)
+        )
