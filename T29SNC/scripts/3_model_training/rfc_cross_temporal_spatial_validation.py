@@ -81,9 +81,11 @@ clf.fit(X, y, **{'OwnMethod2__filters': filts})
 pickle.dump(clf, open(MODELS_PATH+'near_final_clf_.pkl','wb'))
 
 ## model2
-rfc = RandomForestClassifier(n_estimators=500, random_state=random_state, n_jobs=-1)
-rfc.fit(X, y)
-pickle.dump(rfc, open(MODELS_PATH+'final_RFC.pkl','wb'))
+znorm = StandardScaler()
+rfc = RandomForestClassifier(n_estimators=250, random_state=random_state, n_jobs=-1)
+clf = Pipeline([('ZNorm', znorm), ('RFC', rfc)])
+clf.fit(X, y)
+pickle.dump(clf, open(MODELS_PATH+'final_RFC.pkl','wb'))
 
 # ---------------------------------------------------------------------------- #
 # Cross Spatial Validation
