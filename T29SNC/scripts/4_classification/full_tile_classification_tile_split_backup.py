@@ -11,18 +11,20 @@ from rasterio import features
 from src.preprocess.readers import SentinelProductReader
 
 # configs
-random_state = 0
 BANDS_PATH = 'T29SNC/data/organized_images/'
-#MODELS_PATH = 'T29SNC/models/'
+MODELS_PATH = 'T29SNC/models/'
 RESULTS_PATH = 'T29SNC/results/'
 TILES_SHAPEFILE = 'T29SNC/data/shapefiles/s2tilesPT/sentinel2_tiles.shp'
 LABELS_SHAPEFILE15 = 'T29SNC/data/COS2015/cos15_merged_29SNC_UTMZ29N.shp'
 LABELS_SHAPEFILE18 = 'T29SNC/data/COS2018/COS2018v1.shp'
 FEATURE_RANK_PATH = RESULTS_PATH+'feature_rankings_standardized.csv'
+SAVE_PATH = '/run/media/green/Elements/full_tile_saves/'
 n_tile_splits = 5
 MONTH = 1
 END_YEAR = 2020
 
+# load classifier
+clf = pickle.load(open(MODELS_PATH+'final_RFC.pkl', 'rb'))
 
 # util functions
 def make_data_cubes(X, order):
@@ -51,7 +53,7 @@ del gdf_tiles #, tile_shape
 
 # get shapefiles
 gdf_cos15 = gpd.read_file(LABELS_SHAPEFILE15)
-gdf_cos18 = gpd.read_file(LABELS_SHAPEFILE18).to_crs(gdf_cos15.crs['init'])
+gdf_cos18 = gpd.read_file(LABELS_SHAPEFILE18).to_crs(gdf_cos15.crs)
 del gdf_cos15
 
 # rasterize COS
@@ -85,7 +87,7 @@ masks = []
 for i in range(n_tile_splits**2):
     mask = np.zeros(raster.shape)*np.nan
     row = i//n_tile_splits
-    column = 5%n_tile_splits
+    column = i%n_tile_splits
     if row!=(n_tile_splits-1) and column!=(n_tile_splits-1):
         mask[row*step[0]:(row+1)*step[0], column*step[1]:(column+1)*step[1]] = 1
     elif row==(n_tile_splits-1) and column!=(n_tile_splits-1):
@@ -212,3 +214,10 @@ for i, mask in enumerate(masks):
     df = df.dropna()
     y = df['COS2018_n1'].values.astype(int)
     X = df.rename(columns=cols_mapper)[feats.to_list()].values
+
+    df_res = df[['x','y']]
+    del df
+    df_res['y_true'] = y
+    df_res['y_pred'] = clf.predict(X)
+    df_res.to_csv(SAVE_PATH+f'endmonth_{MONTH}_endyear_{END_YEAR}_part_{i+1}_of_{n_tile_splits**2}.csv')
+    del df_res
