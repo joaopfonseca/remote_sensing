@@ -805,7 +805,7 @@ class pixel_selection:
 
     def get_clusters(self, method='som', cluster_col='clusters', identify_dominant_cluster=False, random_state=None):
         """stage 1"""
-        assert method in self.methods, f'Method {method} not implemented. Possible options are {methods}'
+        assert method in self.methods, f'Method {method} not implemented. Possible options are {self.methods}'
         assert self._previous_cluster_col or method!='bhattacharyya', f'bhattacharyya method should only be used for consistency analysis.'
 
         if method == 'som':
