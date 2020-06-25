@@ -1,7 +1,7 @@
 IPSTERS proj - Main Experiments 
 ===============================
 
-In this repository you can find most of the experiments I developed for the project "IPSTERS - IPSentinel Terrestrial Enhanced Recognition System", funded by "Fundação para a Ciência e a Tecnologia".
+In this repository you can find most of the experiments I developed for the project "IPSTERS - IPSentinel Terrestrial Enhanced Recognition System", funded by "Fundação para a Ciência e a Tecnologia". For full info please follow [this link](https://joaopfonseca.github.io/projects/ipsters/).
 
 Project Organization
 ------------
