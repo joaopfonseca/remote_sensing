@@ -37,7 +37,6 @@ organized_images/
 *.upa
 *.upb
 *.dvi
-*.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
