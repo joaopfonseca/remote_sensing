@@ -1,5 +1,3 @@
-% TODO: Reformat citation and bibliography style, reformat paragraph spacing
-
 \documentclass[12pt, english, openany]{book}
 
 \usepackage{graphicx}
@@ -21,6 +19,7 @@
 \usepackage{tabu}
 \usepackage{booktabs}
 \usepackage{amsmath}
+\usepackage{bookmark}
 
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
@@ -73,47 +72,45 @@
 \selectlanguage{english}
 
 \begin{titlepage}
-	\clearpage\thispagestyle{empty}
-	\centering
-	\vspace{.5cm}
+  \clearpage\thispagestyle{empty}
+  \centering
+  \vspace{.5cm}
 
-	% Titles
-	{\large \textbf{Final Report} \par}
-	\vspace{2.5cm}
-	{\Huge \textbf{IPSTERS}} \\
+  % Titles
+  {\large \textbf{Final Report} \par}
+  \vspace{2.5cm}
+  {\Huge \textbf{IPSTERS}} \\
   \vspace{1cm}
   {\Huge IPSentinel Terrestrial Enhanced Recognition System} \\
-	\vspace{2.5cm}
-	{\large \textbf{João Fonseca} \par}
-	\vspace{.5cm}
-	{\large \textbf{Advisor:} Prof. Fernando Lucas Bação, PhD \par}
+  \vspace{2.5cm}
+  {\large \textbf{João Fonseca} \par}
+  \vspace{.5cm}
+  {\large \textbf{Advisor:} Prof. Fernando Lucas Bação, PhD \par}
 
-	\vspace{1.5cm}
-    \includegraphics[scale=0.2]{ims_logo.png}
+  \vspace{1.5cm}
+  \includegraphics[scale=0.2]{ims_logo.png}
   \vspace{1.3cm}
 
-	{\normalsize NOVA Information Management School \\
-		Instituto Superior de Estatística e Gestão de Informação \\
-		Universidade Nova de Lisboa \par}
+  {\normalsize NOVA Information Management School \\
+    Instituto Superior de Estatística e Gestão de Informação \\
+    Universidade Nova de Lisboa \par}
 
   \vspace{1.5cm}
 
-	% Set the date
-	{\normalsize \textbf \today \par}
-	\pagebreak
+  % Set the date
+  {\normalsize \textbf \today \par}
+  \pagebreak
 \end{titlepage}
 
 \chapter*{Abstract}
 
-This report documents the work developed up to this point towards the research
+This report documents the work developed towards the research
 project "IPSTERS - IPSentinel Terrestrial Enhanced Recognition System". It
 focuses on the exploration of several machine learning (ML) techniques,
 covering different stages of a Land Use/Land Cover Classification (LULC)
 pipeline. These techniques aim to minimise problems typically found in this
 kind of data, namely data ingestion, feature selection, data filtering and
 classification.
-
-
 
 \tableofcontents{}
 
@@ -162,22 +159,21 @@ the least amount of human intervention. We propose exploring two artificial
 intelligence approaches, one applying active learning techniques and another
 based on fuzzy logic.
 
-Specifically, this report focuses on the exploration of techniques to
-improve the quality of LULC map outputs by the model under development. As
-such, topics such as Dimensionality Reduction, Anomaly Detection and
-Classification methods will be discussed.
+Specifically, this report focuses on the exploration of techniques to improve
+the quality of LULC map outputs by the model under development. As such, topics
+such as Dimensionality Reduction, Anomaly Detection and Classification methods
+will be discussed.
 
 Most of the work developed so far (excluding presentations and all preliminary
 experiments) is available in the Github repositories of the project:
 \begin{enumerate}
   \item \href{https://github.com/joaopfonseca/remote_sensing}{
-  \textbf{remote-sensing:} Includes all experiments except data
-  filtering/anomaly detection methods.}
+          \textbf{remote-sensing:} Includes all experiments except data
+          filtering/anomaly detection methods.}
   \item \href{https://github.com/joaopfonseca/data-filtering}{
-  \textbf{data-filtering:} Includes experiments ran for data filtering/anomaly
-  detection methods.}
+          \textbf{data-filtering:} Includes experiments ran for data filtering/anomaly
+          detection methods.}
 \end{enumerate}
-
 
 \section{Document Structure}
 
@@ -194,28 +190,24 @@ here. The multispectral imagery used in this project is targeted for a large
 area (continental Portugal) and contains complex and highly correlated spectral
 information. Although the presence of multicollinearity doesn't pose a problem
 for the adequacy of modern ML models to predict a target variable
-\cite{Farrell2019}, high dimensional data is difficult to process and therefore
-strains the capacity of producing accurate LULC maps. Dimensionality reduction
-techniques are used to address such an issue. These techniques allow the
-selection of the most important feature within the image composites used,
+\cite{Farrell2019}, high dimensional data is difficult to process and
+therefore strains the capacity of producing accurate LULC maps. Dimensionality
+reduction techniques are used to address such an issue. These techniques allow
+the selection of the most important feature within the image composites used,
 allowing for 1) a clearer understanding of the most important features for LULC
 classification, 2) accelerated model training and 3) avert the curse of
 dimensionality \cite{Ghojogh2019}.
 
-% insert picture depicting data filtering vs feature selection vs feature extraction
-
-% ask Arman for help on dataset description later on
 The datasets used in this project are Sentinel 2 image composites overlaid with
-the Portuguese Land cover-land use maps (COS). This
-type of data is prone to noisy labelling for various reasons. Label noisy may
-come from discrepancies between the original map's resolution (in the case of
-COS, 1ha) and the objective map's resolution (for this project,
-10m\textsuperscript{2}), as well as land cover type changes or classification
-errors. % insert image with mislabeled regions
-Mislabeled points are potentially problematic since the use of these points for
-producing land cover maps at a 10m\textsuperscript{2} resolution can output
-generalised and/or erroneous predictions. Therefore, it is necessary to
-explore the need for noisy data filtering.
+the Portuguese Land cover-land use maps (COS). This type of data is prone to
+noisy labelling for various reasons. Label noisy may come from discrepancies
+between the original map's resolution (in the case of COS, 1ha) and the
+objective map's resolution (for this project, 10m\textsuperscript{2}), as
+well as land cover type changes or classification errors. Mislabeled points are
+potentially problematic since the use of these% insert image with mislabeled regions
+points for producing land cover maps at a 10m\textsuperscript{2} resolution
+can output generalised and/or erroneous predictions. Therefore, it is necessary
+to explore the need for noisy data filtering.
 
 Finally, classification algorithms are discussed in the last section. These
 algorithms should be resistant to noise and/or have correcting measures to
@@ -224,12 +216,12 @@ decrease the effect of the noisy data in the model's learning phase.
 \section{Dimensionality Reduction Methods} \label{sec:dimensionality-reduction-LR}
 Dimensionality reduction techniques can be divided into 2 parts, feature
 selection and feature extraction, both techniques explored below. Figure
-\ref{fig:dimensionality-reduction} depicts the different types of techniques to
-reduce a dataset's dimensionality.
+\ref{fig:dimensionality-reduction} depicts the different types of techniques to reduce a
+dataset's dimensionality.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=.8\linewidth]{dimensionality_reduction.png}
+  \centering
+  \includegraphics[width=.8\linewidth]{dimensionality_reduction.png}
   \caption{Dimensionality Reduction Techniques}
   \label{fig:dimensionality-reduction}
 \end{figure}
@@ -243,30 +235,29 @@ Feature selection methods reduce dimensionality through the selection of the
 most important features among the ones already existing in the dataset. The
 criterion used either improves, maintains the model accuracy, or simplifies the
 model complexity. Below are presented commonly used supervise feature selection
-methods. For more information on listed and/or additional methods the reader is
-directed to \cite{Cai2018, Ghojogh2019}.
+methods. More information on listed and/or additional methods can be found in
+\cite{Cai2018, Ghojogh2019}.
 
 \begin{enumerate}
   % TODO: find references
-  \item Correlation based feature selection (CFS). It's based on the predictive
-  power of a feature subset, found by computing the correlation between the
-  feature subset and the target feature. It is therefore a generalisation
-  of the Correlation Criteria as defined in \cite{Ghojogh2019}.
+  \item Correlation based feature selection (CFS). It's based on the predictive power
+        of a feature subset, found by computing the correlation between the feature
+        subset and the target feature. It is therefore a generalisation of the
+        Correlation Criteria as defined in \cite{Ghojogh2019}.
   \item ReliefF \cite{kononenko1997}. It's an extension of Relief
-  \cite{kira1992} to support multi-class problems. For each instance, the
-  algorithm considers the closest instance from each class to update the
-  feature score vector. The score of any given feature decreases if it differs
-  more in nearby instances of the same class than nearby instances of the other
-  class, and increases in the reverse case.
-  % TODO: Find references
-  \item Random Subspace Method (RSM) and Random Forest Method (RFM). Consists
-  in the training of base classifiers on different feature subsets. These
-  methods use the trained classifiers to assess each feature's importance to
-  the prediction of the target variable. In the case of RFM, it is important to
-  consider that Tree based classifiers are trained through the minimisation of
-  entropy on each data split. As such, variables used earlier for decision
-  rules along a decision tree's path is deemed as having a higher importance
-  than the remaining variables.
+        \cite{kira1992} to support multi-class problems. For each instance, the
+        algorithm considers the closest instance from each class to update the feature
+        score vector. The score of any given feature decreases if it differs more in
+        nearby instances of the same class than nearby instances of the other class,
+        and increases in the reverse case. % TODO: Find references
+  \item Random Subspace Method (RSM) and Random Forest Method (RFM). Consists in the
+        training of base classifiers on different feature subsets. These methods use
+        the trained classifiers to assess each feature's importance to the prediction
+        of the target variable. In the case of RFM, it is important to consider that
+        Tree based classifiers are trained through the minimisation of entropy on each
+        data split. As such, variables used earlier for decision rules along a decision
+        tree's path is deemed as having a higher importance than the remaining
+        variables.
 \end{enumerate}
 
 % TODO: Find references
@@ -276,97 +267,89 @@ after training a classifier and check accuracy drops) and Drop Column Feature
 Importance (dropping one feature and checking differences in accuracy compared
 to a classifier using all available features).
 
-
-\subsection*{Feature Extraction}
-
-\textbf{NOTE:} We haven't focused on this part yet, it's going to be the next
-step.
-
 \section{Data Filtering Methods}
 
 The accuracy of a classifier is directly affected by the quality the training
-data used \cite{Boukir2019}. Despite the importance of classification tasks in
-remote sensing, obtaining well-labelled data is time consuming, impracticable
-and expensive \cite{Pelletier2017Filtering}. To the best of our knowledge there
-is no systematic review on data selection/filtering methods for the remote
-sensing domain. Through the analysis of the different algorithms available, 2
-distinct types of filtering were identified, each dividing into 2 subgroups.
-Figure \ref{fig:noisy-label-detection} depicts the different methods found for
-this purpose.
+data used \cite{Boukir2019}. Despite the importance of classification
+tasks in remote sensing, obtaining well-labelled data is time consuming,
+impracticable and expensive \cite{Pelletier2017Filtering}. To the best of our
+knowledge there is no systematic review on data selection/filtering methods for
+the remote sensing domain. Through the analysis of the different algorithms
+available, 2 distinct types of filtering were identified, each dividing into 2
+subgroups. Figure \ref{fig:noisy-label-detection} depicts the different methods found
+for this purpose.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=1\linewidth]{noisy_label_detection.png}
+  \centering
+  \includegraphics[width=1\linewidth]{noisy_label_detection.png}
   \caption{Different types of methods found for noisy label detection.}
   \label{fig:noisy-label-detection}
 \end{figure}
 
-LULC maps are commonly presented in a shapefile format. A recent study
-employed polygon membership information for each pixel to detect labelling
-errors within each polygon. This was done through the use of clustering methods
-and cross cluster consistency measurement methods \cite{Paris2019}. Variations
-on this method are explored and documented below.
+LULC maps are commonly presented in a shapefile format. A recent study employed
+polygon membership information for each pixel to detect labelling errors within
+each polygon. This was done through the use of clustering methods and cross
+cluster consistency measurement methods \cite{Paris2019}. Variations on
+this method are explored and documented below.
 
 A frequent type of approach to address this challenge is based on the use of
 different machine learning classifiers to detect these errors
-\cite{Brodley1999, Jiang2004, Liu2008, Yuan2018, Zhang2018,
-Pelletier2017Filtering, Garcia-Gil2019, Boukir2019, Zhang2019}. These methods
-benefit from classifiers' specificities, especially Random Forest, to implement
-different voting strategies and model fitting methods to improve label noise
-detection. Since these methods don't use domain specific information, they can
-be used over any machine learning problem.
+\cite{Brodley1999, Jiang2004, Liu2008, Yuan2018, Zhang2018, Pelletier2017Filtering,
+  Garcia-Gil2019, Boukir2019, Zhang2019}. These methods benefit from classifiers' specificities,
+especially Random Forest, to implement different voting strategies and model
+fitting methods to improve label noise detection. Since these methods don't use
+domain specific information, they can be used over any machine learning
+problem.
 
 Although the impact of these filtering methods on robust classifiers is
 unknown, some studies document the impact of label noise on classification
 accuracy, showing the robustness of Random Forests and Deep Learning algorithms
-\cite{Pelletier2017Effect, Rolnick2017}. Relevant filtering methods presented
-in this section will incorporate the experiment, where the impact of data
-filtering can be assessed (although these results are accompanied with
-significant limitations).
+\cite{Pelletier2017Effect, Rolnick2017}. Relevant filtering methods presented in this section
+will incorporate the experiment, where the impact of data filtering can be
+assessed (although these results are accompanied with significant limitations).
 
 % In order to add an unnumbered section/chapter:
 %\addcontentsline{toc}{section}{Uppgift 1}
 \subsection*{Unsupervised methods}
 
 The best performing label noise detection algorithm based on clustering methods
-was proposed by \cite{Paris2019}. This method assumes the availability of a
-LULC map provided at a polygon level. The training set identification method is
-based on 3 steps:
+was proposed by \cite{Paris2019}. This method assumes the availability
+of a LULC map provided at a polygon level. The training set identification
+method is based on 3 steps:
 \begin{enumerate}
   \item Polygon k-means clustering. Starts by clustering the points within each
-  separate polygon using the K-Means clustering algorithm and the Calinski
-  Harabasz index (CHi) to automatically determine the optimal number of
-  clusters for each polygon. The majority cluster of each polygon passes on to
-  the next step, while all pixels belonging to the minority clusters are
-  dropped and disregarded for potential training set candidates. Figure
-  \ref{fig:paris-kmeans} depicts a qualitative example of this step.
+        separate polygon using the K-Means clustering algorithm and the Calinski
+        Harabasz index (CHi) to automatically determine the optimal number of clusters
+        for each polygon. The majority cluster of each polygon passes on to the next
+        step, while all pixels belonging to the minority clusters are dropped and
+        disregarded for potential training set candidates. Figure
+        \ref{fig:paris-kmeans} depicts a qualitative example of this step.
 
-  \item Polygon consistency analysis. Majority clusters are submitted to
-  consistency analysis, which is done by computing each cluster's Bhattacharyya
-  distance (B-distance) to compute the similarity of each subset to the entire
-  set of clusters of the corresponding class. Afterwards, the clusters with
-  distance from the entire set of clusters smaller than the
-  65\textsuperscript{th} percentile of the cluster distances are selected for
-  Stratified Random Sampling.
+  \item Polygon consistency analysis. Majority clusters are submitted to consistency
+        analysis, which is done by computing each cluster's Bhattacharyya distance
+        (B-distance) to compute the similarity of each subset to the entire set of
+        clusters of the corresponding class. Afterwards, the clusters with distance
+        from the entire set of clusters smaller than the 65\textsuperscript{th}
+        percentile of the cluster distances are selected for Stratified Random
+        Sampling.
 
-  \item Stratified Random Sampling. This step ensures the generation of a
-  balanced dataset, proportionate to the original class ratios.
+  \item Stratified Random Sampling. This step ensures the generation of a balanced
+        dataset, proportionate to the original class ratios.
 \end{enumerate}
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=1\linewidth]{paris_kmeans_results.png}
-  \caption[Qualitative example of polygon k-means clustering
-  result.]{Qualitative example of polygon k-means clustering result. (a)
-  Original polygon associated to the “crop” label. (b) Dominant land-cover
-  class detected C1. (c) First minor class detected C2 (road). (d) Second minor
-  class detected C3 (river). Source: \cite{Paris2019}}
+  \centering
+  \includegraphics[width=1\linewidth]{paris_kmeans_results.png}
+  \caption[Qualitative example of polygon k-means clustering result.]{Qualitative example of polygon k-means clustering result. (a) Original polygon
+    associated to the “crop” label. (b) Dominant land-cover class detected C1. (c)
+    First minor class detected C2 (road). (d) Second minor class detected C3
+    (river). Source: \cite{Paris2019}}
   \label{fig:paris-kmeans}
 \end{figure}
 
 Through qualitative analysis, this method achieved satisfactory results.
-Regardless, it is difficult to determine the quality of these
-results without reference data.
+Regardless, it is difficult to determine the quality of these results without
+reference data.
 
 Other approaches include the use of autoencoders. Each class is used to train
 an autoencoder, allowing the models to learn how to make latent representations
@@ -374,48 +357,46 @@ of instances belonging to a single class. For each instance, a reconstruction
 error will be computed, using it as the mislabel score (the higher the error,
 the more likely the instance is mislabeled) \cite{Zhang2019}.
 
-
 \subsection*{Supervised methods}
 
-All supervised methods take a quantitative approach to the problem.
-Typically, these methods minimise either one of two errors. On the one hand,
-instances incorrectly tagged as mislabeled represent an E1 error. On the other
-hand, mislabeled instances left untagged represent an E2 error. Figure
-\ref{fig:types-detection-errors} shows a visual representation of the two types
-of error.
+All supervised methods take a quantitative approach to the problem. Typically,
+these methods minimise either one of two errors. On the one hand, instances
+incorrectly tagged as mislabeled represent an E1 error. On the other hand,
+mislabeled instances left untagged represent an E2 error. Figure
+\ref{fig:types-detection-errors} shows a visual representation of the two types of
+error.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=.6\linewidth]{detection_errors_types.png}
-  \caption[Types of detection errors.]{Types of detection errors. Adapted from
-  \cite{Brodley1999}.}
+  \centering
+  \includegraphics[width=.6\linewidth]{detection_errors_types.png}
+  \caption[Types of detection errors.]{Types of detection errors. Adapted from \cite{Brodley1999}.}
   \label{fig:types-detection-errors}
 \end{figure}
 
 Supervised methods can be divided into 2 subgroups:
 \begin{enumerate}
-  \item Single model approaches. They use a single model to determine wether a
-  specific instance is correctly labelled. A common implementation includes the
-  use of a standard classifier to predict the label of an instance and tagging
-  it as mislabeled if the classifier's prediction differs from the original
-  label \cite{Brodley1999}.
-  \item Ensemble-based approaches. They use a set of weak classifiers (most
-  commonly Decision Trees) to generate a number of output predictions. These
-  classifiers are always trained in a subset of the dataset, which are then
-  used to predict the label of the remaining dataset. Consequently, this set of
-  classifiers is trained $k$ times, depending on the number of splits used in
-  the data stratification. These predictions are then changed to a binary
-  output of correct/incorrect prediction according to the original label. The
-  more incorrect predictions over a single instance there are, the more likely
-  it is for it to be tagged as mislabeled. The methods for aggregation of the
-  set of individual votes to compute the final score differ according to the
-  method used.
+  \item Single model approaches. They use a single model to determine wether a specific
+        instance is correctly labelled. A common implementation includes the use of a
+        standard classifier to predict the label of an instance and tagging it as
+        mislabeled if the classifier's prediction differs from the original label
+        \cite{Brodley1999}.
+  \item Ensemble-based approaches. They use a set of weak classifiers (most commonly
+        Decision Trees) to generate a number of output predictions. These classifiers
+        are always trained in a subset of the dataset, which are then used to predict
+        the label of the remaining dataset. Consequently, this set of classifiers is
+        trained $k$ times, depending on the number of splits used in
+        the data stratification. These predictions are then changed to a binary output
+        of correct/incorrect prediction according to the original label. The more
+        incorrect predictions over a single instance there are, the more likely it is
+        for it to be tagged as mislabeled. The methods for aggregation of the set of
+        individual votes to compute the final score differ according to the method
+        used.
 \end{enumerate}
 
 Single model approaches benefit from reduced computation power and generally
 improve the quality of the training set generated, although they rarely
-outperform any ensemble-based approach \cite{Brodley1999, Garcia-Gil2019,
-Boukir2019, Pelletier2017Filtering, Zhang2018, Yuan2018}.
+outperform any ensemble-based approach \cite{Brodley1999, Garcia-Gil2019, Boukir2019, Pelletier2017Filtering, Zhang2018,
+  Yuan2018}.
 
 Within ensemble-based approaches there is a simple underlying calculation of a
 mislabel likelihood (henceforth referred to as mislabel ratio). For traditional
@@ -424,74 +405,70 @@ incorrect prediction over the total number of predictions:
 \begin{equation} \label{eq:mislabel-ratio}
   MR(x) = \frac{n-\sum_{i=1}^{n}{v_i^y}}{n}
 \end{equation}
-Where $n$ is the number of predictions for an instance $x$ and $v_i^y$ is 0 if
-the predicted label differs from the true label, 1 otherwise. Although any
-threshold could be set for $MR$ in order to consider an instance's label
-incorrect, most of the literature uses 2 different thresholds, referred to as
-consensus ($MR=1$, i.e., all predictors fail to classify an instance's true
-label) and majority filtering ($MR\geq0.5$, i.e., the majority of predictors
-fail to classify an instance's true label). Therefore, consensus filters focus
-on the minimisation of E1 error whilst majority filtering minimises E2 error
-\cite{Brodley1999, Yuan2018}. Other methods have been used to measure mislabel
-likelihood. \cite{Boukir2019} proposed an ensemble margin score, defined as:
+Where $n$ is the number of predictions for an instance
+$x$ and $v_i^y$ is 0 if the predicted label
+differs from the true label, 1 otherwise. Although any threshold could be set
+for $MR$ in order to consider an instance's label incorrect,
+most of the literature uses 2 different thresholds, referred to as consensus
+($MR=1$, i.e., all predictors fail to classify an instance's
+true label) and majority filtering ($MR\geq0.5$, i.e., the majority
+of predictors fail to classify an instance's true label). Therefore, consensus
+filters focus on the minimisation of E1 error whilst majority filtering
+minimises E2 error \cite{Brodley1999, Yuan2018}. Other methods have been used to
+measure mislabel likelihood. \cite{Boukir2019} proposed an ensemble
+margin score, defined as:
 \begin{equation} \label{eq:ensemble-margin}
   EM(x) = \frac{2\sum_{i=1}^{n}{v_i^y}-n}{n-\sum_{i=1}^{n}{v_i^y}}
 \end{equation}
 
 Both majority and consensus filtering have been used in a number of recent
-publications \cite{Garcia-Gil2019, Boukir2019, Pelletier2017Filtering,
-Zhang2018, Yuan2018}. Some of these methods \cite{Boukir2019, Yuan2018}
-achieved improved performance by implementing an iterative approach to the
-problem, consisting in multiple applications of filtering process a dataset,
-gradually reducing its size on each iteration. Figure
-\ref{fig:ensemble-filter-pipeline} provides a visual representation of an
+publications \cite{Garcia-Gil2019, Boukir2019, Pelletier2017Filtering, Zhang2018, Yuan2018}. Some of these methods
+\cite{Boukir2019, Yuan2018} achieved improved performance by implementing an
+iterative approach to the problem, consisting in multiple applications of
+filtering process a dataset, gradually reducing its size on each iteration.
+Figure \ref{fig:ensemble-filter-pipeline} provides a visual representation of an
 ensemble-based filtering pipeline.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=1\linewidth]{enfilter_pipeline.png}
+  \centering
+  \includegraphics[width=1\linewidth]{enfilter_pipeline.png}
   \caption{Ensemble-based approaches pipeline.}
   \label{fig:ensemble-filter-pipeline}
 \end{figure}
 
-Isolation Forest (iForest) \cite{Liu2008} is another common method used for
-data filtering. It benefits from the use of a set of Isolation Trees (iTrees)
-that attempt to isolate each instance within the dataset. The rationale behind
-this algorithm consists in the measurement of the average path length an
-instance goes through in all iTrees, assuming that an anomaly (in this case, a
-mislabeled instance) has a different profiles than that of the remaining
-population of the corresponding label. Consequently, a mislabelled instance is
-expected to have a smaller path length than that of a correctly classified
-instance, as demonstrated in Figure \ref{fig:iforest-demonstration}.
+Isolation Forest (iForest) \cite{Liu2008} is another common method
+used for data filtering. It benefits from the use of a set of Isolation Trees
+(iTrees) that attempt to isolate each instance within the dataset. The
+rationale behind this algorithm consists in the measurement of the average path
+length an instance goes through in all iTrees, assuming that an anomaly (in
+this case, a mislabeled instance) has a different profiles than that of the
+remaining population of the corresponding label. Consequently, a mislabelled
+instance is expected to have a smaller path length than that of a correctly
+classified instance, as demonstrated in Figure \ref{fig:iforest-demonstration}.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=1\linewidth]{iforest_demo.png}
-  \caption[Anomaly detection using the iForest algorithm.]{Anomaly detection
-  using the iForest algorithm. Anomalies are more susceptible to isolation and
-  hence have short path lengths. (a) a normal point $x_i$ requires twelve
-  random partitions to be isolated; (b) an anomaly $x_o$ requires only four
-  partitions to be isolated. (c) averaged path lengths of $x_i$ and $x_o$
-  converge when the number of trees increases. Source: \cite{Liu2008}}
+  \centering
+  \includegraphics[width=1\linewidth]{iforest_demo.png}
+  \caption[Anomaly detection using the iForest algorithm.]{Anomaly detection using the iForest algorithm. Anomalies are more susceptible
+    to isolation and hence have short path lengths. (a) a normal point
+    $x_i$ requires twelve random partitions to be isolated; (b) an
+    anomaly $x_o$ requires only four partitions to be isolated. (c)
+    averaged path lengths of $x_i$ and $x_o$
+    converge when the number of trees increases. Source: \cite{Liu2008}}
   \label{fig:iforest-demonstration}
 \end{figure}
-
-
 
 \section{Classification Methods}
 
 The most common classifiers identified for land cover image classification are
 Random Forests (RFC), Support Vector Machines (SVM), K-Nearest Neighbours
 (KNN), artificial neural networks (ANN), Maximum Likelihood (ML) and Decision
-Trees (DT) \cite{Khatami2016, Maxwell2018}. However, recent literature has
-focused on the implementation of robust classifiers such as Convolutional
-Neural Networks with varying structures, Random Forests and Autoencoders
+Trees (DT) \cite{Khatami2016, Maxwell2018}. However, recent literature has focused on
+the implementation of robust classifiers such as Convolutional Neural Networks
+with varying structures, Random Forests and Autoencoders
 \cite{Roy2019, Zhang2017, Li2016}.
 
 \subsection*{Convolutional Neural Networks}
-
-\textbf{NOTE:} We still haven't focused on this part, what is presented here is
-just to document relevant algorithms that I have found along the process.
 
 Convolutional Neural Networks (CNN) are a type of deep learning networks,
 commonly applied in image data. Figure \ref{fig:cnn-example} shows a visual
@@ -501,94 +478,120 @@ state of the art results in reference datasets such as Indian Pines.
 % citation needed!
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=1\linewidth]{cnn_example.png}
+  \centering
+  \includegraphics[width=1\linewidth]{cnn_example.png}
   \caption{Typical Convolutional Neural Network example.}
   \label{fig:cnn-example}
 \end{figure}
 
 A particular CNN implementation specific to multi/hyper-spectral imaging
-classification is the Hybrid Spectral Net \cite{Roy2019}. This CNN consists of
-a set of three 3D convolutions (as opposed to the conventional 2D
-convolutions), performing both Spectral and Spatial feature learning, and one 2D
-convolution, followed by two fully connected hidden layers. This model achieved
-state-of-the-art performance on the Indian dataset and was one of the first
-models to implement a CNN architecture based on both 3D and 2D convolutions.
+classification is the Hybrid Spectral Net \cite{Roy2019}. This CNN
+consists of a set of three 3D convolutions (as opposed to the conventional 2D
+convolutions), performing both Spectral and Spatial feature learning, and one
+2D convolution, followed by two fully connected hidden layers. This model
+achieved state-of-the-art performance on the Indian dataset and was one of the
+first models to implement a CNN architecture based on both 3D and 2D
+convolutions.
 
 Another CNN implementation is the Residual Neural Network (ResNet)
-\cite{He2016}. Its architecture allows the construction of very deep networks
-while circumventing the so-called vanishing gradient problem. This algorithm
-along with other deep neural networks have been tested for land cover
+\cite{He2016}. Its architecture allows the construction of very deep
+networks while circumventing the so-called vanishing gradient problem. This
+algorithm along with other deep neural networks have been tested for land cover
 classification, achieving state-of-the-art classification accuracies
 \cite{Mahdianpari2018}.
 
 \subsection*{Random Forests}
 
-Random Forest Classifiers were originally proposed by \cite{Ho1995}. RFCs are
-an ensemble learning method that combine a set of decision trees, each using a
-random subspace of the original feature set. Random Forests correct the
+Random Forest Classifiers were originally proposed by \cite{Ho1995}.
+RFCs are an ensemble learning method that combine a set of decision trees, each
+using a random subspace of the original feature set. Random Forests correct the
 Decision tree's tendency to overfit by using the mode of the prediction of
 individual trees as its final prediction.
 
-\subsection*{Autoencoders}
-\textbf{NOTE:} Usage of autoencoders as classifiers will require additional
-research
-
 \chapter{Methodology}
 
-This chapter describes the work developed so far, along with the models
-implemented for each phase the pipeline that will ultimately produce an
-algorithm able to output an accurate LULC map.
-
-The implementation of the experimental procedure was based on the Python
-programming language, all functions, algorithms, experiments, and results
-reported are available in the Github repository of the \href{https://github.com/joaopfonseca/remote_sensing}{project}.
+This chapter describes the work developed, along with the models implemented
+for each studied step of the pipeline. The implementation of the experimental
+procedure was based on the Python programming language, all functions,
+algorithms, experiments, and results reported are available in the
+\href{https://github.com/joaopfonseca/remote_sensing}{Github repository of the project}.
 
 \section{Datasets}
 
-For the experiments reported below four datasets are used. One employs spectral
-information from the Landsat-8 Satellite with LUCAS reference data (henceforth
-named as the LUCAS dataset). The second uses Sentinel 2 data along with
-COSsim+2018. The third corresponds to sampled points out of Sentinel 2 images
-and the labels were extracted from the EU's agricultural survey. The fourth one
-is used to test classifiers. It consists of a Sentinel-2 Satellite image from
-August 2015 to which COS 2015 was overlaid, the study area covers a region
-around Coimbra, Portugal (see Figure \ref{fig:sentinel2+cos2015}).
+For the experiments reported four datasets are used:
+
+\begin{enumerate}
+  \item LUCAS dataset. The 2015 LUCAS data was used as reference data for both model
+        training and validation. The LUCAS point label represents the corresponding
+        land cover/use type within the radius of 1.5 m for homogeneous classes and a 20
+        m radius extent ("extended window") for heterogeneous classes (e.g.,
+        shrubland), gathered by field observation and a very high-resolution photo
+        interpretation \cite{LUCAS2015C1}. In order to reduce the risk of having
+        Landsat pixel information represented wrongly in the field, we only kept points
+        observed in-situ from a close distance (<100 m). With the same objective we
+        removed the points which had linear features in the observation (e.g., roads).
+        This procedure was not solely applied to the class of "artificial land," as
+        this would remove most parts of the samples. Furthermore, points with cloudy
+        pixels in the Landsat data were also excluded. This way, 1694 out of 2060 LUCAS
+        points were retained. This dataset contains eight classes that represent the
+        main land cover types for the study area. This pixel selection excluded a large
+        number of unacceptable reference points, and we assumed the remaining ones to
+        be suitable enough to represent the land cover type in a Landsat pixel coverage
+        area of 30x30 m. Further, we surmised that classifiers are capable of
+        overcoming the noise caused by pixels having mixed land cover representation if
+        such pixels are still available in the dataset.
+  \item COSsim polygons dataset. It uses a Sentinel 2 composite image along with
+        COSsim+2018. This dataset was produced by taking a sample of polygons from each
+        class with a negative buffer applied and extracting the pixels within it.
+  \item Setubal dataset. Corresponds to sampled points out of Sentinel 2 images and the
+        labels were extracted from the EU's agricultural survey.
+  \item Coimbra dataset. It consists of a Sentinel-2 Satellite tile (29TNE) from August
+        2015 to which COS 2015 was overlaid, the study area covers a region around
+        Coimbra, Portugal (see Figure \ref{fig:sentinel2+cos2015}). Since the size of the
+        entire tile is too large to be processed in a timely manner, a subspace of the
+        image will be used. Figure \ref{fig:classifier-study-area} shows the train (top row,
+        outer non-highlighted area) and test (bottom row) areas along with its true
+        colour image (left column) and ground truth (right column) used to assess the
+        accuracy on each classifier. As such, any pixel and/or neighbouring pixels used
+        for training will never appear in the test set, making them distinct sets.
+  \item COSsim sampled dataset. Corresponds to sampled points out of a Sentinel 2
+        composite image along with COSsim+2018 using the stratified sampling approach.
+  \item COS sampled dataset. Consists of a stratified sample of a Sentinel 2 monthly
+        composite image (between March 2018 and February 2019) of the tile 29SNC along
+        with COS 2015 and 2018 to allow for cross temporal analyses and land cover
+        change analyses. The cross temporal analysis was done with a stratified sample
+        of a similar composite for the period of February 2019 and January 2020. Before
+        the sampling phase, cloud masking was applied to remove the values on
+        months/pixels covered by clouds. These values were then imputed using the
+        linear interpolation of values on adjacent months.
+\end{enumerate}
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=.7\linewidth]{sentinel2_cos.png}
-  \caption{Study area of dataset used to test classifiers.}
+  \centering
+  \includegraphics[width=.7\linewidth]{sentinel2_cos.png}
+  \caption{Tile 29TNE.}
   \label{fig:sentinel2+cos2015}
 \end{figure}
 
-Since the size of the entire tile is too large to be processed in a timely
-manner, a subspace of the image will be used. Figure
-\ref{fig:classifier-study-area} shows the train (top row, outer non-highlighted
-area) and test (bottom row) areas along with its true colour image (left column)
-and ground truth (right column) used to assess the accuracy on each classifier.
-As such, any pixel and/or neighbouring pixels used for training will never
-appear in the test set, making them distinct sets.
-
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=1\linewidth]{classifier_study_area.png}
-  \caption[Subset of study area used to test classifiers.]{Subset of study area
-  used to test classifiers. The top row, outer non-highlighted area is the train
-  set, while the bottom row area is the test set. The left column shows their
-  true colour image and the right column shows the ground truth.}
+  \centering
+  \includegraphics[width=1\linewidth]{classifier_study_area.png}
+  \caption[Coimbra dataset.]{
+    Coimbra dataset. The top row, outer non-highlighted area is the train set,
+    while the bottom row area is the test set. The left column shows their true
+    colour image and the right column shows the ground truth.}
   \label{fig:classifier-study-area}
 \end{figure}
 
 \section{Preprocessing}
 
-In order to extract the data set from the images, a negative buffer was applied
-on labelled polygons in order to avoid border pixels, which are frequently
-mislabeled. Afterwards, a set of experiments was conducted separately for each
-different topic of interest.
+In order to select the pixels for the COSsim polygons, COSsim sampled and COS
+sampled datasets, a negative buffer was applied on labelled polygons in order
+to avoid border pixels, which are frequently mislabeled. Afterwards, a set of
+experiments was conducted separately for each different topic of interest.
 
-An experiment will be run in order to test different feature selection
-methods. The methods applied are the Random Forest Method, Permutation Feature
+An experiment will be run in order to test different feature selection methods.
+The methods applied are the Random Forest Method, Permutation Feature
 Importance and the intersection of both. An Overall Accuracy will be provided
 after training a RFC with each method's selected features.
 
@@ -609,16 +612,17 @@ a granularity measure:
 \begin{equation} \label{eq:k-granularity-formula}
   K(granularity) = int(granularity\sqrt{size(X)})
 \end{equation}
-Where $granularity$ is a hyperparameter and $X$ is the feature matrix.
-Afterwards, the average filtering results are computed per cluster and the top
-$n$\% mislabeled clusters per class are discarded from the training dataset.
-This method also ensures that at least one cluster per class is kept and the
-threshold to define $n$ can be done either through a threshold for the mislabel
-rate or a threshold for the minimum percentage of observations to be kept.
+Where $granularity$ is a hyperparameter and $X$ is
+the feature matrix. Afterwards, the average filtering results are computed per
+cluster and the top $n$\% mislabeled clusters per class are
+discarded from the training dataset. This method also ensures that at least one
+cluster per class is kept and the threshold to define $n$
+can be done either through a threshold for the mislabel rate or a threshold for
+the minimum percentage of observations to be kept.
 
 Additionally, for traditional methods like majority and consensus filtering the
-number of $K$ splits is set up as a hyperparameter, as opposed to the
-predefined $K=4$ used in the literature.
+number of $K$ splits is set up as a hyperparameter, as
+opposed to the predefined $K=4$ used in the literature.
 
 \section{Classification}
 
@@ -632,151 +636,264 @@ ResNet50 (with 2 fully connected layers, a total of 52 hidden layers).
 
 \subsection{Dimensionality Reduction}
 
-The methods applied are described in section
-\ref{sec:dimensionality-reduction-LR}. The Gini method is the calculation of
-the importance of a feature using the (normalised) total reduction of the Gini
-criterion brought by that feature. Permutation is the shuffling of a feature
-after training a classifier and measuring the accuracy difference, returning
-the most important features as the ones that cause the highest accuracy drop.
-The Intersect method is the intersection of both methods, maintaining only the
-features that are selected with both methods. The results of the experiment
-were obtained by training a RFC using the selected features for each method and
-are presented in Table \ref{tab:feature-selection}.
-
+The methods applied are described in section \ref{sec:dimensionality-reduction-LR}. The Gini
+method is the calculation of the importance of a feature using the (normalised)
+total reduction of the Gini criterion brought by that feature. Permutation is
+the shuffling of a feature after training a classifier and measuring the
+accuracy difference, returning the most important features as the ones that
+cause the highest accuracy drop. The Intersect method is the intersection of
+both methods, maintaining only the features that are selected with both
+methods. The results of the experiment were obtained by training a RFC using
+the selected features for each method and are presented in Tables
+\ref{tab:feature-selection} and \ref{tab:COS_sampled_dimreduct_scores}.
 
 \pgfplotstabletypeset[
-	begin table=\begin{longtable},
-		end table=\end{longtable},
-	col sep=comma,
-	header=true,
-	columns={Selection Method,Nbr of features used,Accuracy,F-Score,G-Mean},
-	columns/Selection Method/.style={column type=l,string type},
-  columns/Nbr of features used/.style={column type=l,string type},
-	columns/Accuracy/.style={column type=l,string type},
-  columns/F-Score/.style={column type=l,string type},
-  columns/G-Mean/.style={column type=l,string type},
-	every head row/.style={before row=\toprule, after row=\midrule\endhead},
-	every last row/.style={after row=\bottomrule
-			\\\caption{\label{tab:feature-selection}Feature selection results
-      using the third dataset (agriculture labels).}}
+  begin table=\begin{longtable},
+    end table=\end{longtable}, col sep=comma, header=true,
+  columns={Selection Method,Nbr of features used,Accuracy,F-Score,G-Mean}, columns/Selection Method/.style={column type=c,string type},
+  columns/Nbr of features used/.style={column type=c,string type}, columns/Accuracy/.style={column type=c,string type},
+  columns/F-Score/.style={column type=c,string type}, columns/G-Mean/.style={column type=c,string type},
+  every head row/.style={before row=\toprule, after row=\midrule\endhead}, every last row/.style={after row=\bottomrule \\\caption{\label{tab:feature-selection}Feature selection results
+        using the Setubal dataset. The number of features selected are based on optimal
+        results of each selection method.}}
 ]{tables/feature_selection_results.csv}
 
+\pgfplotstabletypeset[
+  begin table=\begin{longtable},
+    end table=\end{longtable}, col sep=comma, header=true,
+  columns={Method,Accuracy,F-score,G-mean}, columns/Method/.style={column type=c,string type},
+  columns/Accuracy/.style={column type=c,string type}, columns/F-score/.style={column type=c,string type},
+  columns/G-mean/.style={column type=c,string type}, every head row/.style={before row=\toprule, after row=\midrule\endhead},
+  every last row/.style={after row=\bottomrule \\\caption{\label{tab:COS_sampled_dimreduct_scores}Feature selection results
+        using the COS sampled dataset. The number of features selected are based on
+        optimal results of each selection method.}}
+]{tables/COS_sampled_dimreduct_scores.csv}
+
+Another two different dimensionality reduction experiments were done for the
+COSsim sampled and COS sampled datasets, using the same procedure. The feature
+rankings for both datasets are available as csv files. Figures
+\ref{fig:COSsim_n_features} and \ref{fig:COS_sampled_n_features} show the evolution of the
+different evaluation metrics on varying number of features using the ReliefF
+method on the COSsim sampled and COS sampled datasets.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.6\linewidth]{COSsim_n_features.png}
+  \caption[Evolution of the different scorers on varying number of features (COSsim
+    sampled dataset).]{
+    Evolution of the different scorers on varying number of features using the
+    COSsim sampled dataset and the ReliefF method.}
+  \label{fig:COSsim_n_features}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.6\linewidth]{COS_sampled_n_features.png}
+  \caption[Evolution of the different scorers on varying number of features (COS sampled
+    dataset).]{
+    Evolution of the different scorers on varying number of features using the COS
+    sampled dataset and the ReliefF method.}
+  \label{fig:COS_sampled_n_features}
+\end{figure}
+
+Additional analyses based on the COS sampled dataset are presented in tables
+\ref{tab:scores_per_band} and \ref{tab:scores_per_month} and figure
+\ref{fig:band_month_rank_heatmap}. Note that negative normalized mean scores do not
+necessarily mean a negative contribution to the dataset's class separability,
+but rather a below average contribution.
+
+\pgfplotstabletypeset[
+  begin table=\begin{longtable},
+    end table=\end{longtable}, col sep=comma, header=true,
+  columns={Band,Normalized Score},  columns/Band/.style={column type=c,string type},
+  columns/Normalized Score/.style={column type=c,string type}, every head row/.style={before row=\toprule, after row=\midrule\endhead},
+  every last row/.style={after row=\bottomrule \\\caption
+      {\label{tab:scores_per_band} Normalized mean importance per band.}}]{tables/scores_per_band.csv}
+
+\pgfplotstabletypeset[
+  begin table=\begin{longtable},
+    end table=\end{longtable}, col sep=comma, header=true,
+  columns={Month,Normalized Score},  columns/Month/.style={column type=c,string type},
+  columns/Normalized Score/.style={column type=c,string type}, every head row/.style={before row=\toprule, after row=\midrule\endhead},
+  every last row/.style={after row=\bottomrule \\\caption
+      {\label{tab:scores_per_month} Normalized mean importance per month.}}]
+{tables/scores_per_month.csv}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.8\linewidth]{band_month_rank_heatmap.png}
+  \caption{Heatmap based on feature rankings.}
+  \label{fig:band_month_rank_heatmap}
+\end{figure}
+
+Figures \ref{fig:bottom_feature_dist} and \ref{fig:top_feature_dist} show the most and
+least important feature's class distribution using kernel density plots.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\linewidth]{bottom_feature_dist.png}
+  \caption{Kernel density plot of the feature with lowest importance score.}
+  \label{fig:bottom_feature_dist}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\linewidth]{top_feature_dist.png}
+  \caption{Kernel density plot of the feature with highest importance score.}
+  \label{fig:top_feature_dist}
+\end{figure}
 
 \subsection{Data Filtering}
 
 Figure \ref{tab:data-filtering} shows the Overall Accuracy of a RFC trained with
-filtered datasets using each of the filters presented. Note that all methods are
-tuned for optimal performance on the given dataset, as opposed to the fixed
+filtered datasets using each of the filters presented. Note that all methods
+are tuned for optimal performance on the given dataset, as opposed to the fixed
 parameters commonly used in majority, single and consensus filters.
 
-\textbf{TODO:} Add iForest to experiment
-
 \pgfplotstabletypeset[
-	begin table=\begin{longtable},
-		end table=\end{longtable},
-	col sep=comma,
-	header=true,
-	columns={Method,0,5,10,20,30,40},
-  columns/Method/.style={column type=l,string type},
-	columns/0/.style={column type=l,string type},
-  columns/5/.style={column type=l,string type},
-	columns/10/.style={column type=l,string type},
-  columns/20/.style={column type=l,string type},
-  columns/30/.style={column type=l,string type},
-  columns/40/.style={column type=l,string type},
-	every head row/.style={before row=\toprule, after row=\midrule\endhead},
-	every last row/.style={after row=\bottomrule
-			\\\caption{\label{tab:data-filtering}Data filtering results
-      using the LUCAS dataset. Column labels represent the different levels
-      of noise introduced in the original dataset.}}
+  begin table=\begin{longtable},
+    end table=\end{longtable}, col sep=comma, header=true,
+  columns={Method,0,5,10,20,30,40}, columns/Method/.style={column type=c,string type},
+  columns/0/.style={column type=c,string type}, columns/5/.style={column type=c,string type},
+  columns/10/.style={column type=c,string type}, columns/20/.style={column type=c,string type},
+  columns/30/.style={column type=c,string type}, columns/40/.style={column type=c,string type},
+  every head row/.style={before row=\toprule, after row=\midrule\endhead}, every last row/.style={after row=\bottomrule \\\caption{\label{tab:data-filtering}Data filtering results
+        using the LUCAS dataset. Column labels represent the different levels of noise
+        introduced in the original dataset.}}
 ]{tables/filtering_results.csv}
 
-Among the methods presented above other variations of \cite{Paris2019} were
-experimented. These variations considered different clustering methods and used
-two step selection processes, as shown in figure \ref{fig:paris-variations}.
-Clustering methods shown in the columns represent phase 1, which is the initial
-clustering of the pixels in each polygon. The centroids of these clusters are
-then clustered in phase 2, using either method presented in the rows. The
-pixels selected for posterior work are the ones belonging to the subclusters
-(obtained in phase 1) that belong to the majority cluster (computed in phase
-2). This process is done for each existing class in the target variable and the
-optimal number of clusters in both phases is determined using the Calinski-
-Harabasz index. The only two situations where such procedure doesn't apply are
-the methods using Bhattacharyya distance in phase 2, where the same procedure
-as presented in \cite{Paris2019} was used.
+A similar experiment was performed on the COS sampled dataset. This experiments
+uses the same methods, although the dataset is used as-is (i.e., no noise was
+introduced into the dataset). The results of that experiment are reported in
+table \ref{tab:anomally_detection_results}.
+
+\pgfplotstabletypeset[
+  begin table=\begin{longtable},
+    end table=\end{longtable}, col sep=comma, header=true,
+  columns={Method,Accuracy,F-score,G-mean},  columns/Method/.style={column type=c,string type},
+  columns/Accuracy/.style={column type=c,string type}, columns/F-score/.style={column type=c,string type},
+  columns/G-mean/.style={column type=c,string type}, every head row/.style={before row=\toprule, after row=\midrule\endhead},
+  every last row/.style={after row=\bottomrule \\\caption{\label{tab:anomally_detection_results}Data filtering results
+        using the COS sampled dataset.}}
+]{tables/anomally_detection_results.csv}
+
+Aside from the methods presented above, other variations of
+\cite{Paris2019} were experimented. These variations considered
+different clustering methods and used two step selection processes, as shown in
+figure \ref{fig:paris-variations}. Clustering methods shown in the columns
+represent phase 1, which is the initial clustering of the pixels in each
+polygon. The centroids of these clusters are then clustered in phase 2, using
+either method presented in the rows. The pixels selected for posterior work are
+the ones belonging to the subclusters (obtained in phase 1) that belong to the
+majority cluster (computed in phase 2). This process is done for each existing
+class in the target variable and the optimal number of clusters in both phases
+is determined using the Calinski-Harabasz index. The only two situations where
+such procedure doesn't apply are the methods using Bhattacharyya distance in
+phase 2, where the same procedure as presented in \cite{Paris2019} was
+used.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=.7\linewidth]{paris_variations.png}
-  \caption[Paris method variations tested.]{Paris method variations tested.
-  Legend: * Includes per-polygon minority clusters rejection. ** Paris et al.
-  2019 implementation.}
+  \centering
+  \includegraphics[width=.7\linewidth]{paris_variations.png}
+  \caption[Paris method variations tested.]{Paris method variations tested. Legend: * Includes per-polygon minority
+    clusters rejection. ** Paris et al. 2019 implementation.}
   \label{fig:paris-variations}
 \end{figure}
 
 Although some hierarchical clustering methods were experimented, the results
 were rarely satisfactory. For that reason, these algorithms were excluded for
-further analysis. Figure \ref{fig:paris-variations-rainfed-example} present the pixel selection outcome for a polygon belonging to the rainfed class.
+further analysis. Figure \ref{fig:paris-variations-rainfed-example} present the pixel selection
+outcome for a polygon belonging to the rainfed class.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=1\linewidth]{paris_variations_results.png}
-  \caption[Example of Paris variations pixel selection outcomes.]{Example of
-  Paris variations pixel selection outcomes using a polygon belonging to the 
-  rainfed class.}
+  \centering
+  \includegraphics[width=1\linewidth]{paris_variations_results.png}
+  \caption[Example of Paris variations pixel selection outcomes.]
+  {Example of Paris variations pixel selection outcomes using a polygon belonging
+    to the rainfed class.}
   \label{fig:paris-variations-rainfed-example}
 \end{figure}
-
 
 \section{Classification}
 
 The Overall Accuracy (OA), F-Score and Geometric mean (G-Mean) for each
 classifier's prediction on the test area is shown in table
-\ref{tab:classification-scores}.
-
+\ref{tab:classification-scores}. Classification cores on the COS sampled dataset is
+shown in table \ref{tab:COS_sampled_classifier_scores}
 
 \pgfplotstabletypeset[
-	begin table=\begin{longtable},
-		end table=\end{longtable},
-	col sep=comma,
-	header=true,
-	columns={Score,RF,HSN,MLPAE,ResNet50},
-	columns/Score/.style={column type=l,string type},
-  columns/RF/.style={column type=l,string type},
-	columns/HSN/.style={column type=l,string type},
-  columns/MLPAE/.style={column type=l,string type},
-  columns/ResNet50/.style={column type=l,string type},
-	every head row/.style={before row=\toprule, after row=\midrule\endhead},
-	every last row/.style={after row=\bottomrule
-			\\\caption[Classification scores.]
+  begin table=\begin{longtable},
+    end table=\end{longtable}, col sep=comma, header=true,
+  columns={Score,RF,HSN,MLPAE,ResNet50}, columns/Score/.style={column type=c,string type},
+  columns/RF/.style={column type=c,string type}, columns/HSN/.style={column type=c,string type},
+  columns/MLPAE/.style={column type=c,string type}, columns/ResNet50/.style={column type=c,string type},
+  every head row/.style={before row=\toprule, after row=\midrule\endhead}, every last row/.style={after row=\bottomrule \\\caption[Classification scores.]
       {\label{tab:classification-scores}Classification scores using the
-      classifiers fitted to the training area with predictions made on the test
-      area shown in Figure \ref{fig:classifier-study-area}. Legend: Overall
-      Accuracy (OA), Geometric Mean (G-Mean), Random Forest Classifier (RF),
-      Hybrid Spectral Net (HSN), Autoencoder-based multilayer perceptron
-      (MLPAE), Residual Neural Network with 50 layers and 2 fully-connected
-      layers (ResNet50).}}]{tables/classifier_scores.csv}
+        classifiers fitted on the training area (Coimbra dataset) with predictions made
+        on the test area, shown in Figure \ref{fig:classifier-study-area}. Legend: Random
+        Forest Classifier (RF), Hybrid Spectral Net (HSN), Autoencoder-based multilayer
+        perceptron (MLPAE), Residual Neural Network with 50 layers and 2
+        fully-connected layers (ResNet50).}}]{tables/classifier_scores.csv}
+
+\pgfplotstabletypeset[
+  begin table=\begin{longtable},
+    end table=\end{longtable}, col sep=comma, header=true,
+  columns={Score,ABC,GBC,LR,RF}, columns/Score/.style={column type=c,string type},
+  columns/ABC/.style={column type=c,string type}, columns/GBC/.style={column type=c,string type},
+  columns/LR/.style={column type=c,string type}, columns/RF/.style={column type=c,string type},
+  every head row/.style={before row=\toprule, after row=\midrule\endhead}, every last row/.style={after row=\bottomrule \\\caption[Classification scores.]
+      {\label{tab:COS_sampled_classifier_scores}Classification scores using the COS sampled dataset with
+        5-fold cross validation. Legend: AdaBoost Classifier (ABC), Gradient Boosting
+        Classifier (GBC), Logistic Regression (LR), Random Forest Classifier (RF).}}]{tables/COS_sampled_classifier_scores.csv}
 
 The maps generated by each classifier is displayed in Figure
 \ref{fig:classification-prediction-maps}.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=.8\linewidth]{maps_classifiers.png}
-  \caption[Generated maps per classifier.]{Generated maps per classifier. (a)
-  True color image; (b) Ground truth; (c) Random Forest Classifier; (d) Hybrid
-  Spectral Net; (e) Autoencoder-based multilayer perceptron; (f) Residual
-  Neural Network.}
+  \centering
+  \includegraphics[width=.8\linewidth]{maps_classifiers.png}
+  \caption[Generated maps per classifier.]{Generated maps per classifier. (a) True color image; (b) Ground truth; (c)
+    Random Forest Classifier; (d) Hybrid Spectral Net; (e) Autoencoder-based
+    multilayer perceptron; (f) Residual Neural Network.}
   \label{fig:classification-prediction-maps}
 \end{figure}
 
+\subsection*{Cross temporal validation}
+Based on the results reported in the previous sections, we selected the best
+performing methods from each step of the pipeline and measured their
+performance in a cross temporal setting using the COS sampled dataset. Table
+\ref{tab:cross_temporal_validation} shows the algorithms used for this step.
 
+\pgfplotstabletypeset[
+  begin table=\begin{longtable},
+    end table=\end{longtable}, col sep=comma, header=true,
+  columns={Step,Algorithm,Observations}, columns/Step/.style={column type=c,string type},
+  columns/Algorithm/.style={column type=c,string type}, columns/Observations/.style={column type={p{9cm}},string type},
+  every head row/.style={before row=\toprule, after row=\midrule\endhead}, every last row/.style={after row=\bottomrule \\\caption[Classification scores.]
+      {\label{tab:cross_temporal_validation}Algorithms used for cross temporal validation}}]{tables/cross_temporal_validation.csv}
 
-% Adding a bibliography if citations are used in the report
+Given the present epidemic and general lockdown we are presently experiencing
+and the existing limitations on computational power, this experiment was run on
+a computer located in Direção Geral do Território (DGT), whose results are
+unavailable. Although, preliminary experiments on this topics showed that data
+filtering algorithms proved ineffective when faced with cross temporal data.
+
+An additional analysis was done with the goal of understanding LULC change over
+the two most recent LULC maps produced at DGT (2015 and 2018). Figure
+\ref{fig:lulc_change_analysis} shows a confusion matrix comparing land cover change
+over these two periods on a sample of approximately one million pixels over the
+periods of 2015 and 2018.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\linewidth]{lulc_change_analysis.png}
+  \caption[Generated maps per classifier.]{LULC change analysis using the COS sampled dataset.}
+  \label{fig:lulc_change_analysis}
+\end{figure}
+
 \bibliographystyle{plain}
 \bibliography{references.bib}
-% Adds reference to the Bibliography in the ToC
 \addcontentsline{toc}{chapter}{\bibname}
-
+% Adds reference to the Bibliography in the ToC% Adding a bibliography if citations are used in the report
 
 \end{document}

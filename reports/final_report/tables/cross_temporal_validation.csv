@@ -1,0 +1,4 @@
+﻿Step,Algorithm,Observations
+Feature Selection,ReliefF,Reduced dimensionality to the top 70 features
+Data Filtering,Our Method 2,Used hyperparameters that returned optimal results in previous experiments
+Classification,RFC,Used with 500 estimators and Gini criterion

@@ -1,0 +1,7 @@
+Method,Accuracy,F-score,G-mean
+Original,0.674,0.578,0.713
+Correlation Based,0.665,0.569,0.706
+Permutation,0.673,0.579,0.713
+RFEntropy,0.673,0.580,0.715
+RFGini,0.671,0.576,0.712
+ReliefF,0.679,0.580,0.715

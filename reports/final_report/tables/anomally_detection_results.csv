@@ -1,0 +1,8 @@
+Method,Accuracy,F-score,G-mean
+None,0.673,0.575,0.711
+Single,0.652,0.541,0.687
+Consensus,0.666,0.563,0.703
+Majority,0.655,0.546,0.691
+iForest,0.653,0.536,\textbf{0.713}
+OwnMethod1,0.673,\textbf{0.578},0.712
+OwnMethod2,\textbf{0.674},\textbf{0.578},\textbf{0.713}
